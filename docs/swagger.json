@@ -1,0 +1,85 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Shop API - Product",
+      "version": "1.0.0",
+      "description": "Chỉ hiển thị các API: Lấy tất cả sản phẩm & Lấy chi tiết sản phẩm"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3001"
+      }
+    ],
+    "paths": {
+      "/api/product/getAll": {
+        "get": {
+          "summary": "Lấy tất cả sản phẩm",
+          "tags": ["Product"],
+          "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Số lượng sản phẩm mỗi trang",
+              "schema": {
+                "type": "integer",
+                "default": 1000
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "description": "Trang hiện tại",
+              "schema": {
+                "type": "integer",
+                "default": 0
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "description": "Mảng sort, ví dụ ['asc','price']",
+              "schema": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            {
+              "name": "filter",
+              "in": "query",
+              "description": "Mảng filter, ví dụ ['name','iphone']",
+              "schema": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Danh sách sản phẩm"
+            }
+          }
+        }
+      },
+      "/api/product/get-details/{id}": {
+        "get": {
+          "summary": "Lấy chi tiết sản phẩm theo ID",
+          "tags": ["Product"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID sản phẩm",
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Thông tin chi tiết sản phẩm"
+            }
+          }
+        }
+      }
+    }
+  }
+  
