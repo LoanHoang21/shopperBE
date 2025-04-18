@@ -1,3 +1,5 @@
+const { StatusCodes } = require('http-status-codes');
+
 const ProductService = require("../services/ProductService");
 const JwtService = require("../services/JwtService");
 
@@ -35,7 +37,8 @@ const createProduct = async (req, res) => {
     }
 
     const response = await ProductService.createProduct(req.body);
-    return res.status(200).json(response);
+    // return res.status(200).json(response);
+    return res.status(StatusCodes.OK).json(response);
   } catch (e) {
     return res.status(404).json({ message: e });
     
