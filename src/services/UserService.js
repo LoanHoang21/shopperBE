@@ -47,19 +47,37 @@ const createUser = async (data) => {
     }
 };
 
-const updateUser = async(data) => {
-    try {
-        let user = await User.findOne({
-            [{id: data.id}]
-        })
-    } catch (error) {
-        console.log(error);
-        return {
-            EM: "Something wrongs in service...",
-            EC: -2,
-            DT: [],
-          };
+const updateUser = async (data) => {
+  try {
+    let user = await User.findOne({ id: data.id });
+
+    if (!user) {
+      return {
+        EM: "User not found",
+        EC: 1,
+        DT: null,
+      };
     }
+
+    // Cập nhật các trường tại đây (ví dụ)
+    user.name = data.name || user.name;
+    user.email = data.email || user.email;
+
+    await user.save();
+
+    return {
+      EM: "Update successful",
+      EC: 0,
+      DT: user,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "Something wrongs in service...",
+      EC: -2,
+      DT: [],
+    };
+  }
 };
 
 const deleteUser = (id) => {};

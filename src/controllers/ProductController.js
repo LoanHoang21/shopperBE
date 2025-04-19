@@ -13,37 +13,42 @@ function isDiscount(value) {
 
 const createProduct = async (req, res) => {
   try {
-     const {name,image, type, countinstock, description,discount,selled,cpu,screen,ram,memory} = req.body;
+    const {
+      name, price, quantity, short_description, description,
+      discount, sale_quantity, view_count, rating_avg,
+      category_id, barcode_id
+    } = req.body;
 
-    if(!name || !image || !memory || !type || !countinstock  || !discount || !selled || !cpu || !screen || !ram){
-        return res.status(200).json({
-            status: "ERR",
-            message: "Vui lòng nhập đủ thông tin"
-        })
+    const image = req.file?.path || req.file?.secure_url; // cloudinary trả về
+
+    if (!name || !price || !quantity || !image) {
+      return res.status(400).json({ status: 'ERR', message: 'Missing fields' });
     }
 
-    if (!isNumeric(countinstock) || !isNumeric(discount) || !isNumeric(selled) || !isNumeric(screen) || !isNumeric(ram) || !isNumeric(memory)) {
-      return res.status(200).json({
-        status: "ERR",
-        message: "Vui lòng nhập đúng kiểu dữ liệu"
-      });
-    }
- 
-    if(!isDiscount(discount)){
-      return res.status(200).json({
-        status: "ERR",
-        message: "Discount phải dưới 99"
-      });
-    }
+    const newProduct = {
+      name,
+      price,
+      quantity,
+      sale_quantity,
+      short_description,
+      description,
+      discount,
+      view_count,
+      rating_avg,
+      category_id,
+      barcode_id,
+      image,
+    };
 
-    const response = await ProductService.createProduct(req.body);
-    // return res.status(200).json(response);
-    return res.status(StatusCodes.OK).json(response);
-  } catch (e) {
-    return res.status(404).json({ message: e });
-    
+    const created = await ProductService.createProduct(newProduct);
+
+    return res.status(200).json({ status: 'OK', message: 'Created', data: created });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 'ERR', message: 'Server error' });
   }
 };
+
 
 const updateProduct = async (req,res)=>{
   try{

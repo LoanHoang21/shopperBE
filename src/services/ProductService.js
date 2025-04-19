@@ -1,6 +1,19 @@
 const Product = require("../models/ProductModel");
 const JwtService = require("./JwtService");
 
+
+
+const createProduct = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const newProduct = await Product.create(data);
+      resolve(newProduct);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const getDetailProduct = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -73,4 +86,5 @@ const getAllProduct = (limit, page, sort, filter) => {
 module.exports = {
   getDetailProduct,
   getAllProduct,
+  createProduct,
 };
