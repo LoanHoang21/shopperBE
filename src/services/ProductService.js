@@ -68,15 +68,30 @@ const getAllProduct = (limit, page, sort, filter) => {
 
       const allProduct = await Product.find()
         .limit(limit)
-        .skip(page * limit);
+        .skip(page * limit)
+        .populate({
+          path: 'category_id',
+          populate: {
+            path: 'shop_id',
+            model: 'Shop',
+            select: 'name', // chỉ lấy tên shop
+          },
+        })
+        .lean();
+      const finalProduct = allProduct.map(product => ({
+        ...product,
+        shop_name: product.category_id?.shop_id?.name || 'Không rõ'
+      }));
       return resolve({
         status: "OK",
         message: "All Product",
-        data: allProduct,
+        data: finalProduct,
         total: totalProduct,
         pageCurrent: page + 1,
         totalPage: Math.ceil(totalProduct / limit),
       });
+
+
     } catch (e) {
       reject(e);
     }

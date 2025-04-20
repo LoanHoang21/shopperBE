@@ -1,3 +1,5 @@
+const Category = require('../models/CategoryModel');
+
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
@@ -10,10 +12,15 @@ const productSchema = new mongoose.Schema({
   description: { type: String },
   view_count: { type: Number, default: 0 },
   rating_avg: { type: Number, default: 0 },
-  image: { type: String },
+  images: [{ type: String }],
   barcode_id: { type: Number },
-  category_id: { type: Number },
-  deleted_at: { type: Date, default: null }
+  category_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category', // 👈 thêm dòng này
+  },
+    // ✅ THÊM DẤU PHẨY
+  deleted_at: { type: Date, default: null },
+
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
