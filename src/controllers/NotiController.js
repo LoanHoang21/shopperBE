@@ -1,0 +1,105 @@
+// const JwtService = require("../services/JwtService");
+const NotiService = require("../services/NotiService");
+
+const createNotiOrder = async (req, res) => {
+    try{
+        let data = await NotiService.createNotiOrder(req.body);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+};
+
+const createNotiVoucher = async (req, res) => {
+    try{
+        let data = await NotiService.createNotiVoucher(req.body);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
+const getAllNotiByReceiveId = async (req, res) => {
+    const receiverId = req.params.id;
+    try{
+        let data = await NotiService.getAllNotiByReceiveId(receiverId);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
+const getAllNotiByNotiType = async (req, res) => {
+    const receiverId = req.params.id;
+    const notiTypeId = req.query.notitype_id;
+    try{
+        let data = await NotiService.getAllNotiByNotiType(receiverId, notiTypeId);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
+const updateStatusNoti = async (req, res) => {
+    try {
+        const notiId = req.params.id;
+        let data = await NotiService.updateStatusNoti(notiId, req.body);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    } catch (error) {
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+
+}
+
+module.exports = {
+    getAllNotiByNotiType,
+    updateStatusNoti,
+    createNotiOrder,
+    createNotiVoucher,
+    getAllNotiByReceiveId,
+};

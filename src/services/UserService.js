@@ -22,7 +22,7 @@ const getAllList = async () => {
         DT: users,
       };
     }
-  } catch (error) {
+  } catch (e) {
     console.log(e);
     return {
       EM: "Something wrongs in service...",
@@ -50,8 +50,13 @@ const createUser = async (data) => {
 const updateUser = async(data) => {
     try {
         let user = await User.findOne({
-            [{id: data.id}]
-        })
+            id: data.id
+        });
+        if(user){
+          user.save()
+        }else{
+
+        }
     } catch (error) {
         console.log(error);
         return {
@@ -62,7 +67,31 @@ const updateUser = async(data) => {
     }
 };
 
-const deleteUser = (id) => {};
+const deleteUser = async (id) => {
+  try{
+    const deletedUser = await User.findByIdAndDelete(id);
+    if(deletedUser){
+      return {
+        EM: "Xóa user thành công",
+        EC: 0,
+        DT: deletedUser,
+      };
+    }else{
+      return {
+        EM: "Không tồn tại user cần xóa",
+        EC: 0,
+        DT: [],
+      };
+    }
+  } catch (e) {
+    console.log(error);
+    return {
+        EM: "Something wrongs in service...",
+        EC: -2,
+        DT: [],
+      };
+  }
+};
 
 module.exports = {
   getAllList,
