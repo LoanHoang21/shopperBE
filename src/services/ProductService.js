@@ -1,6 +1,19 @@
 const Product = require("../models/ProductModel");
 const JwtService = require("./JwtService");
 
+
+
+const createProduct = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const newProduct = await Product.create(data);
+      resolve(newProduct);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const getDetailProduct = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -55,15 +68,30 @@ const getAllProduct = (limit, page, sort, filter) => {
 
       const allProduct = await Product.find()
         .limit(limit)
-        .skip(page * limit);
+        .skip(page * limit)
+        .populate({
+          path: 'category_id',
+          populate: {
+            path: 'shop_id',
+            model: 'Shop',
+            select: 'name', // chỉ lấy tên shop
+          },
+        })
+        .lean();
+      const finalProduct = allProduct.map(product => ({
+        ...product,
+        shop_name: product.category_id?.shop_id?.name || 'Không rõ'
+      }));
       return resolve({
         status: "OK",
         message: "All Product",
-        data: allProduct,
+        data: finalProduct,
         total: totalProduct,
         pageCurrent: page + 1,
         totalPage: Math.ceil(totalProduct / limit),
       });
+
+
     } catch (e) {
       reject(e);
     }
@@ -73,4 +101,5 @@ const getAllProduct = (limit, page, sort, filter) => {
 module.exports = {
   getDetailProduct,
   getAllProduct,
+  createProduct,
 };

@@ -48,23 +48,23 @@ const createUser = async (data) => {
 };
 
 const updateUser = async(data) => {
-    try {
-        let user = await User.findOne({
-            id: data.id
-        });
-        if(user){
-          user.save()
-        }else{
+  try {
+      let user = await User.findOne({
+          id: data.id
+      });
+      if(user){
+        user.save()
+      }else{
 
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            EM: "Something wrongs in service...",
-            EC: -2,
-            DT: [],
-          };
-    }
+      }
+  } catch (error) {
+      console.log(error);
+      return {
+          EM: "Something wrongs in service...",
+          EC: -2,
+          DT: [],
+        };
+  }
 };
 
 
