@@ -13,7 +13,7 @@ const categoryRoute = require('./routers/CategoryRoute');
 const shopRoute = require('./routers/ShopRoute');
 const reviewRoute = require('./routers/ReviewRoute');
 const categoryTypeRoute = require('./routers/CategoryTypeRoute');
-
+const voucherRouter = require('./routers/VoucherRouter')
 dotenv.config();
 const port = process.env.PORT || 3001;
 
@@ -28,6 +28,7 @@ app.use('/api/category-type', categoryTypeRoute);
 app.use('/api/category', categoryRoute);
 app.use('/api/shop', shopRoute);
 app.use('/api/review', reviewRoute);
+app.use('/api/vouchers', voucherRouter);
 
 // Các route khác của bạn
 routes(app);
