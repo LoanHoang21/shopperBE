@@ -10,4 +10,6 @@ const shopSchema = new mongoose.Schema({
   deleted_at: { type: Date, default: null }
 });
 
-module.exports = mongoose.model('Shop', shopSchema);
+// module.exports = mongoose.model('Shop', shopSchema);
+const Shop = mongoose.models.Shop || mongoose.model("Shop", ShopSchema);
+

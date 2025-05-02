@@ -1,11 +1,11 @@
 // const JwtService = require("../services/JwtService");
-const NotiTypeService = require("../services/NotiTypeService");
-const OrderService = require("../services/OrderService");
+// const NotiTypeService = require("../services/NotiTypeService");
+const OrderAdminService = require("../services/OrderAdminService");
 
 const getAllOrderById = async (req, res) => {
     const customerId = req.params.id;
     try{
-        let data = await OrderService.getAllOrderById(customerId);
+        let data = await OrderAdminService.getAllOrderById(customerId);
         return res.status(200).json({
             EM: data.EM, // error message
             EC: data.EC, // error code
@@ -24,7 +24,7 @@ const getAllOrderById = async (req, res) => {
 const updateStatusOrder = async (req, res) => {
     const orderId = req.params.id;
     try{
-        let data = await OrderService.updateStatusOrder(orderId, req.body);
+        let data = await OrderAdminService.updateStatusOrder(orderId, req.body);
         return res.status(200).json({
             EM: data.EM, // error message
             EC: data.EC, // error code
