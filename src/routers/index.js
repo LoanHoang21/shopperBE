@@ -5,10 +5,13 @@ const NotiTypeRouter = require("./NotiTypeRouter");
 const NotiRouter = require('./NotiRouter');
 const OrderRouter = require('./OrderRouter');
 const VoucherRouter = require('./VoucherRouter');
+const CartRouter = require('./CartRouter');
+const CartItemRouter = require('./CartItemRouter');
 
 const routes = (app)=>{
     app.use("/api/product", ProductRouter)
     app.use("/api/auth", AuthRouter)
+    app.use('/api/cartitems', CartItemRouter);
     app.use("/api/user", UserRouter)
     app.use("/api/notiType", NotiTypeRouter)
     app.use("/api/noti", NotiRouter)

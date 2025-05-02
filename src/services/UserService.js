@@ -67,6 +67,7 @@ const updateUser = async(data) => {
     }
 };
 
+
 const deleteUser = async (id) => {
   try{
     const deletedUser = await User.findByIdAndDelete(id);

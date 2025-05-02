@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js"
+    "start": "nodemon src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -22,12 +23,14 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
-    "mongoose": "^8.2.2",
+    "mongoose": "^8.14.0",
     "nodemailer": "^6.9.13",
-    "nodemon": "^3.1.0",
     "redis": "^4.6.13",
     "swagger-ui-dist": "^5.20.3",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
