@@ -47,20 +47,39 @@ const createUser = async (data) => {
     }
 };
 
-const updateUser = async(data) => {
-    try {
-        let user = await User.findOne({
-            [{id: data.id}]
-        })
-    } catch (error) {
-        console.log(error);
-        return {
-            EM: "Something wrongs in service...",
-            EC: -2,
-            DT: [],
-          };
+const updateUser = async (data) => {
+  try {
+    let user = await User.findOne({ id: data.id });
+
+    if (!user) {
+      return {
+        EM: "User not found",
+        EC: 1,
+        DT: [],
+      };
     }
+
+    // Giả sử bạn muốn update user (ví dụ đổi tên)
+    user.name = data.name || user.name;
+    user.email = data.email || user.email;
+
+    await user.save();
+
+    return {
+      EM: "Update user success",
+      EC: 0,
+      DT: user,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "Something wrongs in service...",
+      EC: -2,
+      DT: [],
+    };
+  }
 };
+
 
 const deleteUser = (id) => {};
 

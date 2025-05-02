@@ -14,7 +14,12 @@ const productSchema = new mongoose.Schema(
         cpu: { type: String, required: true },
         screen: { type: String, required: true },
         ram: { type: String, required: true },
-        memory: {type: String,require: true}
+        memory: {type: String,require: true},
+        category_id: {                // ✅ SỬA Ở ĐÂY
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category',             // 🔥 thêm ref tới bảng Category
+            required: true,
+          },
     },
     {
         timestamps: true,
