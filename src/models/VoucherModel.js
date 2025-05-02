@@ -14,6 +14,8 @@ const voucherSchema = new mongoose.Schema(
         max_user  : {type: Number, required: true},
         user_count : {type: Number, default: 0},
         type_voucher: {type: String},
+        type: { type: String, default: 'Shopper' },
+        shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', default: null }
     },
     {
         timestamps: true,

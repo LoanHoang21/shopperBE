@@ -3,8 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 const ProductService = require("../services/ProductService");
 const JwtService = require("../services/JwtService");
 const Category = require("../models/CategoryModel");
-
-
+const axios = require('axios');
 const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
 const ReviewProduct = require('../models/ReviewModel'); 
@@ -217,6 +216,79 @@ const increaseViewCount = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: error.message });
   }
 };
+const getTrendingProductsFromML = async (req, res) => {
+  try {
+    const allProducts = await Product.find().lean();
+
+    const payload = allProducts.map(p => ({
+      product_id: p._id,
+      rating_avg: p.rating_avg || 0,
+      sale_quantity: p.sale_quantity || 0,
+      view_count: p.view_count || 0,
+    }));
+
+    const response = await axios.get('http://192.168.112.101:5000/predict-trending-from-db');
+
+
+    const trendingIds = response.data.map(item => item.product_id);
+
+    const trendingProducts = allProducts
+      .filter(p => trendingIds.includes(p._id.toString()))
+      .map(p => ({
+        _id: p._id,
+        name: p.name,
+        images: p.images || [],
+        price: p.price,
+        discount: p.discount,
+        rating_avg: p.rating_avg,
+      }));
+
+    res.status(200).json({ status: 'OK', data: trendingProducts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: 'ERR',
+      message: 'Không lấy được sản phẩm trending',
+    });
+  }
+};
+const removeAccents = require('remove-accents');
+
+const searchProducts = async (req, res) => {
+  try {
+    const query = removeAccents(req.query.query || '').toLowerCase();
+
+    // populate để lấy shop name
+    const allProducts = await Product.find()
+      .populate({
+        path: 'category_id',
+        populate: { path: 'shop_id' }
+      })
+      .lean();
+
+    const filtered = allProducts.filter(p =>
+      removeAccents(p.name || '').toLowerCase().includes(query)
+    );
+
+    // Thêm shop_name vào kết quả trả về
+    const result = filtered.map(p => ({
+      ...p,
+      shop_name: p.category_id?.shop_id?.name || 'Không rõ'
+    }));
+
+    res.status(200).json({
+      status: 'OK',
+      data: result.slice(0, 20)
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: 'ERR',
+      message: 'Lỗi tìm kiếm sản phẩm'
+    });
+  }
+};
 
 module.exports = {
   // ... các hàm khác
@@ -231,5 +303,7 @@ module.exports = {
   getAllProduct,
   getRelatedProducts,
   getAllProductFilter,
-  increaseViewCount
+  increaseViewCount,
+  searchProducts,
+  getTrendingProductsFromML
 };
