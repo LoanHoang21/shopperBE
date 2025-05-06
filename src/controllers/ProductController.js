@@ -7,6 +7,10 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
 const ReviewProduct = require('../models/ReviewModel'); 
+const ProductAttribution = require('../models/ProductAttribution');
+const CategoryAttribution = require('../models/CategoryAttribution');
+const Attribution = require('../models/Attribution'); 
+
 function isNumeric(value) {
   return Number.isFinite(Number(value)) && Number(value) >=0;
 }
@@ -290,6 +294,63 @@ const searchProducts = async (req, res) => {
   }
 };
 
+const getProductAttributions = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        status: 'ERR',
+        message: 'Invalid product ID',
+      });
+    }
+
+    // Lấy danh sách các nhóm phân loại mà sản phẩm thuộc về
+    const productAttributions = await ProductAttribution.find({
+      product_id: id,
+      deleted_at: null
+    }).lean();
+
+    const categoryAttrIds = productAttributions.map(pa => pa.category_attribution_id);
+
+    // Lấy thông tin từng category + các giá trị attribution của nó
+    const categories = await CategoryAttribution.find({
+      _id: { $in: categoryAttrIds }
+    }).lean();
+
+    const attributions = await Attribution.find({
+      category_attribution_id: { $in: categoryAttrIds }
+    }).lean();
+
+    // Gộp lại thành dạng:
+    // [{ category: 'Màu sắc', values: ['Đỏ', 'Xanh'] }, ...]
+    const result = categories.map(cat => {
+      const values = attributions
+        .filter(attr => String(attr.category_attribution_id) === String(cat._id))
+        .map(attr => attr.name);
+
+      return {
+        category: cat.name,
+        values
+      };
+    });
+
+    return res.status(200).json({
+      status: 'OK',
+      data: result
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 'ERR',
+      message: 'Server error while fetching attributions'
+    });
+  }
+};
+
+
+
 module.exports = {
   // ... các hàm khác
   increaseViewCount,
@@ -305,5 +366,6 @@ module.exports = {
   getAllProductFilter,
   increaseViewCount,
   searchProducts,
-  getTrendingProductsFromML
+  getTrendingProductsFromML,
+  getProductAttributions
 };
