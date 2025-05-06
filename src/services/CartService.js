@@ -32,7 +32,7 @@ const isSameAttribution = (a, b) => {
   );
 };
 
-const addToCart = async (userId, { product_id, quantity, attributions = [] }) => {
+const addToCart = async (userId, { product_id, quantity, attributions = [], variant_id }) => {
   let cart = await Cart.findOne({ customer_id: userId });
   if (!cart) {
     cart = await Cart.create({ customer_id: userId });
@@ -72,6 +72,7 @@ const addToCart = async (userId, { product_id, quantity, attributions = [] }) =>
   const newItem = await CartItem.create({
     product_id: new mongoose.Types.ObjectId(product_id),
     quantity,
+    variant_id: new mongoose.Types.ObjectId(variant_id),
     attributions,
     cartId: new mongoose.Types.ObjectId(cart._id),
     isSelected: false,
@@ -96,6 +97,7 @@ const getCartItemsByUser = async (userId) => {
         }
       }
     })
+    .populate('variant_id')
     .lean();
 
   return items;

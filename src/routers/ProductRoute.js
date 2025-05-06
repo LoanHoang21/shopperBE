@@ -12,6 +12,7 @@ router.post('/view/:id', ProductController.increaseViewCount);
 router.get('/suggested/ml-trending', ProductController.getTrendingProductsFromML);
 router.get('/search', ProductController.searchProducts);
 router.get('/:id/attributions', ProductController.getProductAttributions);
+router.get('/:id/variants', ProductController.getProductVariantsByProductId);
 
 module.exports = router;
 

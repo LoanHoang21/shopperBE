@@ -10,6 +10,7 @@ const ReviewProduct = require('../models/ReviewModel');
 const ProductAttribution = require('../models/ProductAttribution');
 const CategoryAttribution = require('../models/CategoryAttribution');
 const Attribution = require('../models/Attribution'); 
+const ProductVariant = require('../models/ProductVariantModel');
 
 function isNumeric(value) {
   return Number.isFinite(Number(value)) && Number(value) >=0;
@@ -350,6 +351,26 @@ const getProductAttributions = async (req, res) => {
 };
 
 
+const getProductVariantsByProductId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id).lean();
+    const variants = await ProductVariant.find({ product_id: id }).lean();
+
+    return res.status(200).json({
+      status: 'OK',
+      data: {
+        ...product,
+        variants
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 'ERR', message: error.message });
+  }
+};
+
+
 
 module.exports = {
   // ... các hàm khác
@@ -367,5 +388,6 @@ module.exports = {
   increaseViewCount,
   searchProducts,
   getTrendingProductsFromML,
-  getProductAttributions
+  getProductAttributions,
+  getProductVariantsByProductId
 };

@@ -13,6 +13,11 @@ const CartItemSchema = new Schema({
     type: Array,
     default: []
   },
+  variant_id: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'ProductVariant',
+    required: true
+  },
   isSelected: { type: Boolean, default: false },         
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
