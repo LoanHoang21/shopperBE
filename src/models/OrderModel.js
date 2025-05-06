@@ -6,11 +6,6 @@ const productOrderSchema = new mongoose.Schema({
         ref: 'Product',
         required: true
     },
-    name: { type: String, required: true },
-    image: { type: String },
-    price: { type: Number, required: true },         // đổi sang Number cho phép tính toán
-    discount: { type: Number, default: 0 },          // đổi sang Number
-    quantity: { type: Number, required: true },
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema(
@@ -37,6 +32,6 @@ const orderSchema = new mongoose.Schema(
     }
 );
 
-const Order = mongoose.model('Order', orderSchema);
+const OrderAdmin = mongoose.model('OrderAdmin', orderSchema);
 
-module.exports = Order;
+module.exports = OrderAdmin;
