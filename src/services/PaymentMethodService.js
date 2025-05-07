@@ -1,10 +1,18 @@
 const PaymentMethod = require('../models/PaymentMethod');
 
-const createPaymentMethod = async (data) => {
-  const created = await PaymentMethod.create(data);
-  return created;
+const PaymentMethodService = {
+  create: async (data) => {
+    const newMethod = new PaymentMethod(data);
+    return await newMethod.save();
+  },
+
+  getAll: async () => {
+    return await PaymentMethod.find();
+  },
+
+  getPaymentMethodById: async (id) => {
+    return await PaymentMethod.findById(id);
+  },
 };
 
-module.exports = {
-  createPaymentMethod,
-};
+module.exports = PaymentMethodService;

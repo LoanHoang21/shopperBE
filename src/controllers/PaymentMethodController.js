@@ -1,26 +1,40 @@
-const PaymentMethodService = require("../services/PaymentMethodService");
+const PaymentMethodService = require('../services/PaymentMethodService');
 
 const createPaymentMethod = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const method = await PaymentMethodService.create(req.body);
+    res.status(201).json({ status: 'OK', message: 'Created', data: method });
+  } catch (err) {
+    res.status(500).json({ status: 'ERR', message: err.message });
+  }
+};
 
-    if (!name) {
-      return res.status(400).json({ status: 'ERR', message: 'Name is required' });
+const getAllPaymentMethods = async (req, res) => {
+  try {
+    const methods = await PaymentMethodService.getAll();
+    res.status(200).json({ status: 'OK', message: 'Fetched', data: methods });
+  } catch (err) {
+    res.status(500).json({ status: 'ERR', message: err.message });
+  }
+};
+
+const getPaymentMethodById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await PaymentMethodService.getPaymentMethodById(id);
+
+    if (!result) {
+      return res.status(404).json({ status: 'ERR', message: 'Not found' });
     }
 
-    const result = await PaymentMethodService.createPaymentMethod({ name, description });
-
-    return res.status(201).json({
-      status: 'OK',
-      message: 'Payment method created',
-      data: result,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ status: 'ERR', message: 'Internal server error' });
+    return res.status(200).json({ status: 'OK', data: result });
+  } catch (error) {
+    return res.status(500).json({ status: 'ERR', message: 'Server error' });
   }
 };
 
 module.exports = {
   createPaymentMethod,
+  getAllPaymentMethods,
+  getPaymentMethodById
 };

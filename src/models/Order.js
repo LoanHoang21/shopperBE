@@ -15,7 +15,7 @@ const productOrderSchema = new mongoose.Schema({
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema({
-  product: {
+  products: {
     type: [productOrderSchema],
     required: true,
     validate: [val => val.length > 0, 'Order must have at least one product']

@@ -3,7 +3,7 @@ const OrderService = require("../services/OrderService");
 const createOrder = async (req, res) => {
   try {
     const {
-      product,
+      products,
       quantity,
       customer_id,
       address_id,
@@ -14,7 +14,7 @@ const createOrder = async (req, res) => {
     } = req.body;
 
     // Kiểm tra trường bắt buộc
-    if (!product || !quantity || !customer_id || !address_id || !payment_method_id || !total_price) {
+    if (!products || !quantity || !customer_id || !address_id || !payment_method_id || !total_price) {
       return res.status(400).json({
         status: "ERR",
         message: "Missing required fields",
@@ -22,7 +22,7 @@ const createOrder = async (req, res) => {
     }
 
     const orderData = {
-      product,
+      products,
       quantity,
       customer_id,
       address_id,

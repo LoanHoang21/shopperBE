@@ -5,7 +5,7 @@ const createOrder = async (orderData) => {
     const createdOrder = await Order.create(orderData);
     // Populate các trường ngay sau khi tạo
     const fullOrder = await Order.findById(createdOrder._id)
-      .populate("product.product_id")
+      .populate("products.product_id")
       .populate("customer_id")
       .populate("address_id")
       .populate("voucher_id")

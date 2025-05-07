@@ -1,18 +1,11 @@
 const mongoose = require('mongoose');
 
-const paymentMethodSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const PaymentMethodSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    type: { type: String, enum: ['e-wallet', 'cod', 'bank'], required: true },
   },
-  description: {
-    type: String,
-    default: '',
-  },
-}, {
-  timestamps: true,
-});
+  { timestamps: true }
+);
 
-const PaymentMethod = mongoose.model('PaymentMethod', paymentMethodSchema);
-module.exports = PaymentMethod;
+module.exports = mongoose.model('PaymentMethod', PaymentMethodSchema);
