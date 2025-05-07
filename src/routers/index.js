@@ -25,6 +25,8 @@ const routes = (app)=>{
     app.use("/api/address", AddressRouter)
     app.use("/api/shipment", ShipmentRouter)
     app.use("/api/payment-method", PaymentMethodRouter)
+    app.use("/api/cart", CartRouter); // 
+
 }
 
 module.exports = routes
