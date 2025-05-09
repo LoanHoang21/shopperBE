@@ -1,9 +1,8 @@
 const Voucher = require("../models/VoucherModel");
-const admin = require("../config/firebase");
 
 const getAllVoucher = async () => {
   try {
-    let vouchers = await Voucher.find({ deleted_at: null }).sort({ _id: -1 });
+    let vouchers = await Voucher.find({ deleted_at: null }).sort({ end_date: -1 });
     if (vouchers) {
       return {
         EM: "Lấy danh sách tất cả voucher thành công",

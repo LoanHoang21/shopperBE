@@ -25,7 +25,7 @@ const notiSchema = new mongoose.Schema(
         sender_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User', // tên model liên kết
-            required: true
+            // required: true
         },
         is_read: {type: Boolean, default: false},
     },

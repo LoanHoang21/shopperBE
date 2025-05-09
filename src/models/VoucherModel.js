@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const voucherSchema = new mongoose.Schema(
     {
         code: { type: String, required: true },
-        image: {type: String, required: true},
+        image: { type: String, required: true },
         description: { type: String, required: true },
         discount_type: {type: String, required: true},
         discount_value: {type: Number},
@@ -15,7 +15,7 @@ const voucherSchema = new mongoose.Schema(
         user_count : {type: Number, default: 0},
         type_voucher: {type: String},
         type: { type: String, default: 'Shopper' },
-        shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', default: null }
+        shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', default: null },
     },
     {
         timestamps: true,

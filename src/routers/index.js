@@ -11,11 +11,12 @@ const AddressRouter = require('./AddressRouter');
 const CartRouter = require('./CartRouter');
 const CartItemRouter = require('./CartItemRouter');
 const PaymentMethodRouter = require('./PaymentMethodRouter');
+const SettingNotiRouter = require('./SettingNotiRouter');
 
 const routes = (app)=>{
     app.use("/api/product", ProductRouter)
     app.use("/api/auth", AuthRouter)
-    app.use('/api/cartitems', CartItemRouter);
+    app.use('/api/cartitems', CartItemRouter)
     app.use("/api/user", UserRouter)
     app.use("/api/notiType", NotiTypeRouter)
     app.use("/api/noti", NotiRouter)
@@ -27,6 +28,7 @@ const routes = (app)=>{
     app.use("/api/payment-method", PaymentMethodRouter)
     app.use("/api/cart", CartRouter); // 
 
+    app.use("/api/settingNoti", SettingNotiRouter)
 }
 
 module.exports = routes

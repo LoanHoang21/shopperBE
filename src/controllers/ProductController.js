@@ -12,6 +12,8 @@ const CategoryAttribution = require('../models/CategoryAttribution');
 const Attribution = require('../models/Attribution'); 
 const ProductVariant = require('../models/ProductVariantModel');
 
+const axios = require('axios');
+
 function isNumeric(value) {
   return Number.isFinite(Number(value)) && Number(value) >=0;
 }
@@ -371,13 +373,30 @@ const getProductVariantsByProductId = async (req, res) => {
 };
 
 
+const removeAccents = require('remove-accents');
 
-module.exports = {
-  // ... các hàm khác
-  increaseViewCount,
+const getRecommendedProductByOrders = async (req, res) => {
+  try {
+      const userId = req.params.id;
+      let data = await ProductService.getRecommendedProductByOrders(userId);
+      return res.status(200).json({
+          EM: data.EM, // error message
+          EC: data.EC, // error code
+          DT: data.DT, // data
+      });
+  } catch (error) {
+      console.log(e);
+      return res.status(500).json({ 
+          EM: 'error from server',
+          EC: '-1',
+          DT: '',
+      });
+  }
 };
 
+
 module.exports = {
+  increaseViewCount,
   createProduct,
   updateProduct,
   getDetailsProduct,
@@ -389,5 +408,6 @@ module.exports = {
   searchProducts,
   getTrendingProductsFromML,
   getProductAttributions,
-  getProductVariantsByProductId
+  getProductVariantsByProductId,
+  getRecommendedProductByOrders,
 };

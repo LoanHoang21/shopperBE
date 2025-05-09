@@ -85,7 +85,7 @@ const updateStatusNoti = async (req, res) => {
             EC: data.EC, // error code
             DT: data.DT, // data
         });
-    } catch (error) {
+    } catch (e) {
         console.log(e);
         return res.status(500).json({ 
             EM: 'error from server',
@@ -96,10 +96,132 @@ const updateStatusNoti = async (req, res) => {
 
 }
 
+const getAllNotiBySenderIdAndNotiType = async (req, res) => {
+    const senderId = req.params.id;
+    const notiTypeId = req.query.notitype_id;
+    try{
+        let data = await NotiService.getAllNotiBySenderIdAndNotiType(senderId, notiTypeId);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
+const getNotiUpdateOrder = async (req, res) => {
+    const receiverId = req.params.id;
+    const notiTypeId = req.query.notitype_id;
+    try{
+        let data = await NotiService.getNotiUpdateOrder(receiverId, notiTypeId);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
+const getTwoNotiUpdateOrderLastest = async (req, res) => {
+    const receiverId = req.params.id;
+    const notiTypeId = req.query.notitype_id;
+    try{
+        let data = await NotiService.getTwoNotiUpdateOrderLastest(receiverId, notiTypeId);
+        return res.status(200).json({
+            EM: data.EM,
+            EC: data.EC,
+            DT: data.DT,
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
+const createNotiByAdmin = async (req, res) => {
+    try{
+        let data = await NotiService.createNotiByAdmin(req.body);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+};
+
+const updateNotiByAdmin = async (req, res) => {
+    try{
+        const notiId = req.params.id;
+        let data = await NotiService.updateNotiByAdmin(notiId, req.body);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+};
+
+const deleteNotiByAdmin = async (req, res) => {
+    try{
+        const notiId = req.params.id;
+        let data = await NotiService.deleteNotiByAdmin(notiId);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+};
+
 module.exports = {
     getAllNotiByNotiType,
     updateStatusNoti,
     createNotiOrder,
     createNotiVoucher,
     getAllNotiByReceiveId,
+    getAllNotiBySenderIdAndNotiType,
+    getNotiUpdateOrder,
+    getTwoNotiUpdateOrderLastest,
+    createNotiByAdmin,
+    updateNotiByAdmin,
+    deleteNotiByAdmin,
 };

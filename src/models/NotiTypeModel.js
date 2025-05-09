@@ -6,7 +6,7 @@ const notiTypeSchema = new mongoose.Schema(
         name: { type: String, required: true, unique: true },
         description: { type: String },
         status: { type: Number, default: 1 },
-        deleted_at: {type: Date, default: null},
+        deletedAt: {type: Date, default: null},
     },
     {
         timestamps: true,

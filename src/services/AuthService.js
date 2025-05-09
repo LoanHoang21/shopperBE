@@ -1,7 +1,8 @@
-const Product = require("../models/ProductModel");
 const User = require("../models/UserModel");
+const SettingNoti = require("../models/SettingNotiModel");
 const JwtService = require("./JwtService");
 const bcrypt = require("bcryptjs");
+const { startUserVoucherJob , stopUserVoucherJob } = require("./NotiService");
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -48,12 +49,16 @@ const register = async (body) => {
     // hash user password
     let hashPassword = hashUserPassword(body.password);
 
+    // Lấy bản ghi SettingNoti có status: "Bật"
+    const defaultSettingNoti = await SettingNoti.findOne({ status: "Bật" });
+
     // create new user
     await User.create({
       username: body.username,
       email: body.email,
       phone: body.phone,
       password: hashPassword,
+      setting_noti_id: defaultSettingNoti._id,
     });
     console.log('Tạo tài khoản thành công', body);
     return {
@@ -69,58 +74,58 @@ const register = async (body) => {
   }
 };
 
-const getAllProduct = (limit, page, sort, filter) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const totalProduct = await Product.countDocuments();
+// const getAllProduct = (limit, page, sort, filter) => {
+//   return new Promise(async (resolve, reject) => {
+//     try {
+//       const totalProduct = await Product.countDocuments();
 
-      if (filter) {
-        const allProductFilter = await Product.find({
-          [filter[0]]: { $regex: filter[1], $options: "i" },
-        });
-        return resolve({
-          status: "OK",
-          message: "All Product",
-          data: allProductFilter,
-          total: totalProduct,
-          pageCurrent: page + 1,
-          totalPage: Math.ceil(totalProduct / limit),
-        });
-      }
+//       if (filter) {
+//         const allProductFilter = await Product.find({
+//           [filter[0]]: { $regex: filter[1], $options: "i" },
+//         });
+//         return resolve({
+//           status: "OK",
+//           message: "All Product",
+//           data: allProductFilter,
+//           total: totalProduct,
+//           pageCurrent: page + 1,
+//           totalPage: Math.ceil(totalProduct / limit),
+//         });
+//       }
 
-      if (sort) {
-        const objectSort = {};
-        objectSort[sort[1]] = sort[0];
-        const allProductSort = await Product.find()
-          .limit(limit)
-          .skip(page * limit)
-          .sort(objectSort);
-        return resolve({
-          status: "OK",
-          message: "Success",
-          data: allProductSort,
-          total: totalProduct,
-          pageCurrent: page + 1,
-          totalPage: Math.ceil(totalProduct / limit),
-        });
-      }
+//       if (sort) {
+//         const objectSort = {};
+//         objectSort[sort[1]] = sort[0];
+//         const allProductSort = await Product.find()
+//           .limit(limit)
+//           .skip(page * limit)
+//           .sort(objectSort);
+//         return resolve({
+//           status: "OK",
+//           message: "Success",
+//           data: allProductSort,
+//           total: totalProduct,
+//           pageCurrent: page + 1,
+//           totalPage: Math.ceil(totalProduct / limit),
+//         });
+//       }
 
-      const allProduct = await Product.find()
-        .limit(limit)
-        .skip(page * limit);
-      return resolve({
-        status: "OK",
-        message: "All Product",
-        data: allProduct,
-        total: totalProduct,
-        pageCurrent: page + 1,
-        totalPage: Math.ceil(totalProduct / limit),
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
-};
+//       const allProduct = await Product.find()
+//         .limit(limit)
+//         .skip(page * limit);
+//       return resolve({
+//         status: "OK",
+//         message: "All Product",
+//         data: allProduct,
+//         total: totalProduct,
+//         pageCurrent: page + 1,
+//         totalPage: Math.ceil(totalProduct / limit),
+//       });
+//     } catch (e) {
+//       reject(e);
+//     }
+//   });
+// };
 
 const checkPassword = (inputPassword, hashPassword) => {
   return bcrypt.compareSync(inputPassword, hashPassword);
@@ -142,6 +147,9 @@ const login = async (rawData) => {
     if(user){
       let isCorrectPassword = checkPassword(rawData.password, user.password);
       if(isCorrectPassword === true){
+        if(user.role !== 1){
+          startUserVoucherJob(user._id);
+        }
         return {
           EM: "Đăng nhập thành công",
           EC: 0,
@@ -163,10 +171,31 @@ const login = async (rawData) => {
       EC: -2,
     }
   }
-}
+};
+
+const logout = async (userId) => {
+  try {
+    // Dừng job kiểm tra voucher
+    stopUserVoucherJob(userId);
+
+    // Optional: Xóa fcm_token nếu cần
+    await User.findByIdAndUpdate(userId, { fcm_token: null });
+
+    return {
+      EM: "Đăng xuất thành công",
+      EC: 0,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "Lỗi khi đăng xuất",
+      EC: -2,
+    };
+  }
+};
 
 module.exports = {
-  getAllProduct,
   register,
   login,
+  logout,
 };
