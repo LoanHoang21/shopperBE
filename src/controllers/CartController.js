@@ -51,7 +51,7 @@ const deleteCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
   try {
-    const { userId, product_id, quantity, attributions, variant_id } = req.body;
+    const { userId, product_id, quantity, variant_id } = req.body;
 
     if (!userId || !product_id || !quantity ||!variant_id) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -60,7 +60,6 @@ const addToCart = async (req, res) => {
     const result = await CartService.addToCart(userId, {
       product_id,
       quantity,
-      attributions,
       variant_id
     });
     
