@@ -12,7 +12,6 @@ const CategoryAttribution = require('../models/CategoryAttribution');
 const Attribution = require('../models/Attribution'); 
 const ProductVariant = require('../models/ProductVariantModel');
 
-const axios = require('axios');
 
 function isNumeric(value) {
   return Number.isFinite(Number(value)) && Number(value) >=0;
@@ -371,9 +370,6 @@ const getProductVariantsByProductId = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: error.message });
   }
 };
-
-
-const removeAccents = require('remove-accents');
 
 const getRecommendedProductByOrders = async (req, res) => {
   try {

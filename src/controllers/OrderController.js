@@ -65,8 +65,22 @@ const getProductVariants = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+
+  const result = await OrderService.updateOrderStatus(orderId, status);
+  return res.status(result.status === 'OK' ? 200 : 500).json(result);
+};
+
+module.exports = {
+  updateOrderStatus,
+};
+
+
 module.exports = {
   createOrder,
   getOrdersByCustomerId,
   getProductVariants,
+  updateOrderStatus,
 };

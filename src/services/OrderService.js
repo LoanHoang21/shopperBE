@@ -115,4 +115,32 @@ const getProductVariantsWithDetails = async (productRequests) => {
   });
 };
 
-module.exports = { createOrder, getOrdersByCustomerId, getProductVariantsWithDetails };
+const updateOrderStatus = async (orderId, status) => {
+  try {
+    const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return { status: 'ERR', message: 'Invalid order status' };
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return { status: 'ERR', message: 'Order not found' };
+    }
+
+    return {
+      status: 'OK',
+      message: 'Order status updated successfully',
+      data: updatedOrder,
+    };
+  } catch (err) {
+    return { status: 'ERR', message: err.message };
+  }
+};
+
+
+module.exports = { createOrder, getOrdersByCustomerId, getProductVariantsWithDetails, updateOrderStatus };
