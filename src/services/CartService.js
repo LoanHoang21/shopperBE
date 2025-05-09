@@ -34,10 +34,11 @@ const isSameAttribution = (a, b) => {
 
 const addToCart = async (userId, { product_id, quantity, attributions = [], variant_id }) => {
   let cart = await Cart.findOne({ customer_id: userId });
+  console.log('🛒 Tìm giỏ hàng:', cart);
   if (!cart) {
     cart = await Cart.create({ customer_id: userId });
   }
-  console.log('📦 Cart tìm thấy:', cart?._id);
+  // console.log('📦 Cart tìm thấy:', cart?._id);
 
   const existingItems = await CartItem.find({
     cartId: cart._id,
@@ -45,7 +46,7 @@ const addToCart = async (userId, { product_id, quantity, attributions = [], vari
     deleted_at: null
   });
 
-  console.log('📄 Các item đang có trong giỏ:', existingItems);
+  // console.log('📄 Các item đang có trong giỏ:', existingItems);
 
   const existingItem = existingItems.find(item =>
     isSameAttribution(item.attributions || [], attributions)

@@ -4,14 +4,18 @@ const mongoose = require('mongoose');
 const productOrderSchema = new mongoose.Schema({
   product_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: 'ProductVariant',
     required: true,
   },
   quantity: {
     type: Number,
     required: true,
     min: 1
-  }
+  },
+  type: {
+    type: String,
+    required: true,
+  },
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema({

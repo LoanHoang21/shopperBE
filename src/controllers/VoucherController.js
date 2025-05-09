@@ -20,24 +20,6 @@ const getAllVoucher = async (req, res) => {
     }
 }
 
-const createNotiOrder = async (req, res) => {
-    try{
-        let data = await NotiService.createNotiOrder(req.body);
-        return res.status(200).json({
-            EM: data.EM, // error message
-            EC: data.EC, // error code
-            DT: data.DT, // data
-        });
-    }catch(e){
-        console.log(e);
-        return res.status(500).json({ 
-            EM: 'error from server',
-            EC: '-1',
-            DT: '',
-        });
-    }
-}
-
 const getVouchersByShop = async (req, res) => {
     try {
         const { shopId } = req.params;
@@ -54,8 +36,29 @@ const getVouchersByShop = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }
+
+const getDetailVoucher = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await VoucherService.getDetailVoucher(id);
+  
+      return res.status(200).json({
+        EM: data.EM,
+        EC: data.EC,
+        DT: data.DT,
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        EM: "Lỗi từ server",
+        EC: -1,
+        DT: null,
+      });
+    }
+  };
+
 module.exports = {
     getAllVoucher,
-    createNotiOrder,
-    getVouchersByShop
+    getVouchersByShop,
+    getDetailVoucher,
 };

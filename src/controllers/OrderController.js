@@ -31,7 +31,7 @@ const createOrder = async (req, res) => {
       payment_method_id,
       total_price,
     };
-
+    
     const result = await OrderService.createOrder(orderData);
     return res.status(result.status === "OK" ? 200 : 500).json(result);
   } catch (error) {
@@ -48,7 +48,25 @@ const getOrdersByCustomerId = async (req, res) => {
   return res.status(result.status === "OK" ? 200 : 500).json(result);
 };
 
+const getProductVariants = async (req, res) => {
+  try {
+    const {products} = req.body;
+    console.log(products);
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ message: 'Danh sách sản phẩm không hợp lệ' });
+    }
+
+    const result = await OrderService.getProductVariantsWithDetails(products);
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('❌ Lỗi khi lấy thông tin product variants:', err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrdersByCustomerId,
+  getProductVariants,
 };
