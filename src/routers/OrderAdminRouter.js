@@ -5,8 +5,7 @@ const OrderAdminController = require("../controllers/OrderAdminController");
 
 router.get('/getAll/:id', OrderAdminController.getAllOrderById);
 router.post('/updateStatus/:id', OrderAdminController.updateStatusOrder)
-// router.get('/getDetails/:id', NotiTypeController.getDetailsNotiType);
-// router.get('/getAll',ProductController.getAllProduct);
+router.get('/getAllOrder', OrderAdminController.getAllOrder)
 
 module.exports = router;
 

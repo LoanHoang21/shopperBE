@@ -66,8 +66,6 @@ const getQuantityNoti = async (receiverId, notitypeId = null) => {
   }
 };
 
-
-
 const createNotiType = async (data) => {
     try {
         await NotiType.create({

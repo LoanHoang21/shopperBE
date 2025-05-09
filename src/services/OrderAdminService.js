@@ -1,5 +1,5 @@
-const User = require("../models/UserModel");
-const NotiType = require("../models/NotiTypeModel");
+// const User = require("../models/UserModel");
+// const NotiType = require("../models/NotiTypeModel");
 const Order = require("../models/OrderModel");
 
 const getAllOrderById = async (customerId) => {
@@ -31,23 +31,23 @@ const getAllOrderById = async (customerId) => {
   }
 };
 
-const createNotiType = async (data) => {
-    try {
-        await NotiType.create({
-          image: data.image,
-          name: data.name,
-          description: data.description,
-          status: data.status,
-        })
-    } catch (error) {
-        console.log(error);
-        return {
-            EM: "Something wrongs in service...",
-            EC: -2,
-            DT: [],
-          };
-    }
-};
+// const createNotiType = async (data) => {
+//     try {
+//         await NotiType.create({
+//           image: data.image,
+//           name: data.name,
+//           description: data.description,
+//           status: data.status,
+//         })
+//     } catch (error) {
+//         console.log(error);
+//         return {
+//             EM: "Something wrongs in service...",
+//             EC: -2,
+//             DT: [],
+//           };
+//     }
+// };
 
 const updateStatusOrder = async (orderId, data) => {
   console.log(orderId);
@@ -84,54 +84,83 @@ const updateStatusOrder = async (orderId, data) => {
 };
 
 
-const deleteNotiType = async (id) => {
-  try {
-    const updatedNotiType = await NotiType.findByIdAndUpdate(
-      id,
-      { deleted_at: new Date() },
-      { new: true }
-    );
+// const deleteNotiType = async (id) => {
+//   try {
+//     const updatedNotiType = await NotiType.findByIdAndUpdate(
+//       id,
+//       { deleted_at: new Date() },
+//       { new: true }
+//     );
 
-    if (updatedNotiType) {
+//     if (updatedNotiType) {
+//       return {
+//         EM: "Đánh dấu loại thông báo là đã xóa thành công",
+//         EC: 0,
+//         DT: updatedNotiType,
+//       };
+//     } else {
+//       return {
+//         EM: "Không tồn tại loại thông báo cần đánh dấu xóa",
+//         EC: 0,
+//         DT: [],
+//       };
+//     }
+//   } catch (e) {
+//     console.log(e);
+//     return {
+//         EM: "Something wrongs in service...",
+//         EC: -2,
+//         DT: [],
+//       };
+//   }
+// };
+
+// const getDetailsNotiType = async (id) => {
+//   try {
+//     const notiType = await NotiType.findOne({
+//       _id: id,
+//       deleted_at: null,
+//     });
+//     if(notiType){
+//       return {
+//         EM: "Lấy thông tin loại thông báo thành công",
+//         EC: 0,
+//         DT: notiType,
+//       };
+//     }else {
+//       return {
+//         EM: "Không tìm thấy loại thông báo",
+//         EC: 0,
+//         DT: notiType,
+//       };
+//     }
+//   } catch (e) {
+//     console.log(e);
+//     return {
+//       EM: "Something wrongs in service...",
+//       EC: -2,
+//       DT: [],
+//     };
+//   }
+// }
+
+const getAllOrder = async () => {
+  try {
+    let orders = await Order.find()
+                .populate('products.product_id') // Nếu bạn muốn lấy thông tin đầy đủ của sản phẩm
+                .populate('voucher_id', 'discount_type discount_value min_order_value max_discount_value')
+                .sort({ updatedAt: -1 }); // Sắp xếp đơn hàng mới nhất trước
+    if (orders) {
       return {
-        EM: "Đánh dấu loại thông báo là đã xóa thành công",
+        EM: "Lấy danh sách tất cả đơn hàng thành công",
         EC: 0,
-        DT: updatedNotiType,
+        DT: orders,
       };
     } else {
       return {
-        EM: "Không tồn tại loại thông báo cần đánh dấu xóa",
+        EM: "Danh sách tất cả đơn hàng trống",
         EC: 0,
-        DT: [],
-      };
-    }
-  } catch (e) {
-    console.log(e);
-    return {
-        EM: "Something wrongs in service...",
-        EC: -2,
-        DT: [],
-      };
-  }
-};
-
-const getDetailsNotiType = async (id) => {
-  try {
-    const notiType = await NotiType.findOne({
-      _id: id,
-      deleted_at: null,
-    });
-    if(notiType){
-      return {
-        EM: "Lấy thông tin loại thông báo thành công",
-        EC: 0,
-        DT: notiType,
-      };
-    }else {
-      return {
-        EM: "Không tìm thấy loại thông báo",
-        EC: 0,
-        DT: notiType,
+        DT: orders,
       };
     }
   } catch (e) {
@@ -142,12 +171,13 @@ const getDetailsNotiType = async (id) => {
       DT: [],
     };
   }
-}
+};
 
 module.exports = {
   getAllOrderById,
-  createNotiType,
+  // createNotiType,
   updateStatusOrder,
-  deleteNotiType,
-  getDetailsNotiType,
+  getAllOrder,
+  // deleteNotiType,
+  // getDetailsNotiType,
 };

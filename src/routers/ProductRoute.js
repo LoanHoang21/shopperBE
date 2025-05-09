@@ -11,5 +11,6 @@ router.get('/:id/related', ProductController.getRelatedProducts);
 router.post('/view/:id', ProductController.increaseViewCount);
 router.get('/suggested/ml-trending', ProductController.getTrendingProductsFromML);
 router.get('/search', ProductController.searchProducts);
+router.get('/getRecommendedProductByOrders/:id', ProductController.getRecommendedProductByOrders);
 module.exports = router;
 

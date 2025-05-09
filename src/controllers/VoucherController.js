@@ -21,23 +21,6 @@ const getAllVoucher = async (req, res) => {
     }
 }
 
-const createNotiOrder = async (req, res) => {
-    try{
-        let data = await NotiService.createNotiOrder(req.body);
-        return res.status(200).json({
-            EM: data.EM, // error message
-            EC: data.EC, // error code
-            DT: data.DT, // data
-        });
-    }catch(e){
-        console.log(e);
-        return res.status(500).json({ 
-            EM: 'error from server',
-            EC: '-1',
-            DT: '',
-        });
-    }
-}
 const getVouchersByShop = async (req, res) => {
     try {
         const { shopId } = req.params;
@@ -57,6 +40,5 @@ const getVouchersByShop = async (req, res) => {
 
 module.exports = {
     getAllVoucher,
-    createNotiOrder,
     getVouchersByShop
 };

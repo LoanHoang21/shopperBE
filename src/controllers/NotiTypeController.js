@@ -23,8 +23,7 @@ const getQuantityNoti = async (req, res) => {
     try {
       const receiverId = req.params.id;
       const notitypeId = req.query.notitype_id || null;
-      console.log("controller",receiverId,notitypeId);
-  
+      
       const data = await NotiTypeService.getQuantityNoti(receiverId, notitypeId);
       return res.status(200).json({
         EM: data.EM,

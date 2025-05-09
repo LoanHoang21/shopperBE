@@ -7,16 +7,18 @@ const OrderAdminRouter = require('./OrderAdminRouter');
 const VoucherRouter = require('./VoucherRouter');
 const CartRouter = require('./CartRouter');
 const CartItemRouter = require('./CartItemRouter');
+const SettingNotiRouter = require('./SettingNotiRouter');
 
 const routes = (app)=>{
     app.use("/api/product", ProductRouter)
     app.use("/api/auth", AuthRouter)
-    app.use('/api/cartitems', CartItemRouter);
+    app.use('/api/cartitems', CartItemRouter)
     app.use("/api/user", UserRouter)
     app.use("/api/notiType", NotiTypeRouter)
     app.use("/api/noti", NotiRouter)
     app.use("/api/orderAdmin", OrderAdminRouter)
     app.use("/api/voucher", VoucherRouter)
+    app.use("/api/settingNoti", SettingNotiRouter)
 }
 
 module.exports = routes

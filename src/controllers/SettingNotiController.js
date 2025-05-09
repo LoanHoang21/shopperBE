@@ -1,11 +1,10 @@
 // const JwtService = require("../services/JwtService");
-// const NotiTypeService = require("../services/NotiTypeService");
-const OrderAdminService = require("../services/OrderAdminService");
+const SettingNotiService = require("../services/SettingNotiService");
 
-const getAllOrderById = async (req, res) => {
-    const customerId = req.params.id;
+const getAllSettingNotiByStatus = async (req, res) => {
+    const value = req.query.status;
     try{
-        let data = await OrderAdminService.getAllOrderById(customerId);
+        let data = await SettingNotiService.getAllSettingNotiByStatus(value);
         return res.status(200).json({
             EM: data.EM, // error message
             EC: data.EC, // error code
@@ -21,10 +20,9 @@ const getAllOrderById = async (req, res) => {
     }
 }
 
-const updateStatusOrder = async (req, res) => {
-    const orderId = req.params.id;
+const getAllSettingNoti = async (req, res) => {
     try{
-        let data = await OrderAdminService.updateStatusOrder(orderId, req.body);
+        let data = await SettingNotiService.getAllSettingNoti();
         return res.status(200).json({
             EM: data.EM, // error message
             EC: data.EC, // error code
@@ -40,13 +38,14 @@ const updateStatusOrder = async (req, res) => {
     }
 }
 
-const getAllOrder = async (req, res) => {
+const getSettingNotiById = async (req, res) => {
+    const settingNotiId = req.params.id;
     try{
-        let data = await OrderAdminService.getAllOrder();
+        let data = await SettingNotiService.getSettingNotiById(settingNotiId);
         return res.status(200).json({
-            EM: data.EM,
-            EC: data.EC,
-            DT: data.DT,
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
         });
     }catch(e){
         console.log(e);
@@ -57,10 +56,9 @@ const getAllOrder = async (req, res) => {
         });
     }
 }
-
 
 module.exports = {
-    getAllOrderById,
-    updateStatusOrder,
-    getAllOrder,
+    getAllSettingNotiByStatus,
+    getAllSettingNoti,
+    getSettingNotiById,
 };
