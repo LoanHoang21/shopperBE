@@ -132,6 +132,7 @@ const checkPassword = (inputPassword, hashPassword) => {
 }
 
 const login = async (rawData) => {
+  console.log("đăng nhập thành công")
   try {
     let user = await User.findOne({
       $or: [

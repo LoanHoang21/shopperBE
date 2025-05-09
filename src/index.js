@@ -14,6 +14,7 @@ const shopRoute = require('./routers/ShopRoute');
 const reviewRoute = require('./routers/ReviewRoute');
 const categoryTypeRoute = require('./routers/CategoryTypeRoute');
 const voucherRouter = require('./routers/VoucherRouter')
+
 dotenv.config();
 const port = process.env.PORT || 3001;
 
@@ -42,6 +43,6 @@ mongoose
     console.log(err);
   });
 
-  app.listen(port,  () => {
-    console.log(`Server listening on port ${port}`);
-  });
+app.listen(port, "0.0.0.0", () => {
+  console.log("✅ Server is running on port 3000");
+});

@@ -38,6 +38,6 @@ const orderSchema = new mongoose.Schema(
     }
 );
 
-const Order = mongoose.model('Order', orderSchema);
+const OrderAdmin = mongoose.model('OrderAdmin', orderSchema);
 
-module.exports = Order;
+module.exports = OrderAdmin;

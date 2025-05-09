@@ -3,11 +3,15 @@ const { StatusCodes } = require('http-status-codes');
 const ProductService = require("../services/ProductService");
 const JwtService = require("../services/JwtService");
 const Category = require("../models/CategoryModel");
-
-
+const axios = require('axios');
 const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
 const ReviewProduct = require('../models/ReviewModel'); 
+const ProductAttribution = require('../models/ProductAttribution');
+const CategoryAttribution = require('../models/CategoryAttribution');
+const Attribution = require('../models/Attribution'); 
+const ProductVariant = require('../models/ProductVariantModel');
+
 const axios = require('axios');
 
 function isNumeric(value) {
@@ -17,42 +21,6 @@ function isNumeric(value) {
 function isDiscount(value) {
   return Number(value) <=99;  
 }
-const getTrendingProductsFromML = async (req, res) => {
-  try {
-    const allProducts = await Product.find().lean();
-
-    const payload = allProducts.map(p => ({
-      product_id: p._id,
-      rating_avg: p.rating_avg || 0,
-      sale_quantity: p.sale_quantity || 0,
-      view_count: p.view_count || 0,
-    }));
-
-    const response = await axios.get('http://192.168.112.101:5000/predict-trending-from-db');
-
-
-    const trendingIds = response.data.map(item => item.product_id);
-
-    const trendingProducts = allProducts
-      .filter(p => trendingIds.includes(p._id.toString()))
-      .map(p => ({
-        _id: p._id,
-        name: p.name,
-        images: p.images || [],
-        price: p.price,
-        discount: p.discount,
-        rating_avg: p.rating_avg,
-      }));
-
-    res.status(200).json({ status: 'OK', data: trendingProducts });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: 'ERR',
-      message: 'Không lấy được sản phẩm trending',
-    });
-  }
-};
 
 const createProduct = async (req, res) => {
   try {
@@ -255,6 +223,42 @@ const increaseViewCount = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: error.message });
   }
 };
+const getTrendingProductsFromML = async (req, res) => {
+  try {
+    const allProducts = await Product.find().lean();
+
+    const payload = allProducts.map(p => ({
+      product_id: p._id,
+      rating_avg: p.rating_avg || 0,
+      sale_quantity: p.sale_quantity || 0,
+      view_count: p.view_count || 0,
+    }));
+
+    const response = await axios.get('http://192.168.112.101:5000/predict-trending-from-db');
+
+
+    const trendingIds = response.data.map(item => item.product_id);
+
+    const trendingProducts = allProducts
+      .filter(p => trendingIds.includes(p._id.toString()))
+      .map(p => ({
+        _id: p._id,
+        name: p.name,
+        images: p.images || [],
+        price: p.price,
+        discount: p.discount,
+        rating_avg: p.rating_avg,
+      }));
+
+    res.status(200).json({ status: 'OK', data: trendingProducts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: 'ERR',
+      message: 'Không lấy được sản phẩm trending',
+    });
+  }
+};
 const removeAccents = require('remove-accents');
 
 const searchProducts = async (req, res) => {
@@ -293,6 +297,84 @@ const searchProducts = async (req, res) => {
   }
 };
 
+const getProductAttributions = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        status: 'ERR',
+        message: 'Invalid product ID',
+      });
+    }
+
+    // Lấy danh sách các nhóm phân loại mà sản phẩm thuộc về
+    const productAttributions = await ProductAttribution.find({
+      product_id: id,
+      deleted_at: null
+    }).lean();
+
+    const categoryAttrIds = productAttributions.map(pa => pa.category_attribution_id);
+
+    // Lấy thông tin từng category + các giá trị attribution của nó
+    const categories = await CategoryAttribution.find({
+      _id: { $in: categoryAttrIds }
+    }).lean();
+
+    const attributions = await Attribution.find({
+      category_attribution_id: { $in: categoryAttrIds }
+    }).lean();
+
+    // Gộp lại thành dạng:
+    // [{ category: 'Màu sắc', values: ['Đỏ', 'Xanh'] }, ...]
+    const result = categories.map(cat => {
+      const values = attributions
+        .filter(attr => String(attr.category_attribution_id) === String(cat._id))
+        .map(attr => attr.name);
+
+      return {
+        category: cat.name,
+        values
+      };
+    });
+
+    return res.status(200).json({
+      status: 'OK',
+      data: result
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 'ERR',
+      message: 'Server error while fetching attributions'
+    });
+  }
+};
+
+
+const getProductVariantsByProductId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id).lean();
+    const variants = await ProductVariant.find({ product_id: id }).lean();
+
+    return res.status(200).json({
+      status: 'OK',
+      data: {
+        ...product,
+        variants
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 'ERR', message: error.message });
+  }
+};
+
+
+const removeAccents = require('remove-accents');
+
 const getRecommendedProductByOrders = async (req, res) => {
   try {
       const userId = req.params.id;
@@ -312,12 +394,9 @@ const getRecommendedProductByOrders = async (req, res) => {
   }
 };
 
-module.exports = {
-  // ... các hàm khác
-  increaseViewCount,
-};
 
 module.exports = {
+  increaseViewCount,
   createProduct,
   updateProduct,
   getDetailsProduct,
@@ -326,7 +405,9 @@ module.exports = {
   getRelatedProducts,
   getAllProductFilter,
   increaseViewCount,
-  getTrendingProductsFromML,
   searchProducts,
+  getTrendingProductsFromML,
+  getProductAttributions,
+  getProductVariantsByProductId,
   getRecommendedProductByOrders,
 };
