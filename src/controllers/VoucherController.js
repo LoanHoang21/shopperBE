@@ -4,16 +4,16 @@ const Voucher = require('../models/VoucherModel');
 
 const mongoose = require('mongoose');
 const getAllVoucher = async (req, res) => {
-    try{
+    try {
         let data = await VoucherService.getAllVoucher();
         return res.status(200).json({
             EM: data.EM, // error message
             EC: data.EC, // error code
             DT: data.DT, // data
         });
-    }catch(e){
+    } catch (e) {
         console.log(e);
-        return res.status(500).json({ 
+        return res.status(500).json({
             EM: 'error from server',
             EC: '-1',
             DT: '',
@@ -29,8 +29,10 @@ const getVouchersByShop = async (req, res) => {
 
         const vouchers = await Voucher.find({
             type_voucher: 'Shop',
-            shopId: objectId
+            shopId: objectId,
+            $expr: { $lt: ["$user_count", "$max_user"] }  // chỉ lấy khi user_count < max_user
         });
+
 
         res.status(200).json({ status: 'OK', data: vouchers });
     } catch (err) {

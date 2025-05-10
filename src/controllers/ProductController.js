@@ -134,35 +134,50 @@ const getDetailsProduct = async (req, res) => {
 };
 
 
-
 const getRelatedProducts = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Tìm sản phẩm hiện tại kèm category & type_id
     const currentProduct = await Product.findById(id).populate({
       path: 'category_id',
-      populate: { path: 'type_id' }
+      populate: [
+        { path: 'type_id', model: 'CategoryType' },
+        { path: 'shop_id', model: 'Shop' }
+      ]
     });
 
-    if (!currentProduct || !currentProduct.category_id?.type_id) {
-      return res.status(404).json({ message: 'Product or category type not found' });
+    if (!currentProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    if (!currentProduct.category_id) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    if (!currentProduct.category_id.type_id) {
+      return res.status(404).json({ message: 'CategoryType not found' });
     }
 
     const typeId = currentProduct.category_id.type_id._id;
 
-    // Tìm các sản phẩm khác cùng category type
     const relatedProducts = await Product.find({
       _id: { $ne: currentProduct._id }
     }).populate({
       path: 'category_id',
-      match: { type_id: typeId },
-      populate: { path: 'shop_id' }
+      populate: [
+        { path: 'type_id', model: 'CategoryType' },
+        { path: 'shop_id', model: 'Shop' }
+      ]
     });
+
+    const finalProducts = relatedProducts
+      .filter(p => p.category_id?.type_id && String(p.category_id.type_id._id) === String(typeId))
+      .map(p => ({
+        ...p.toObject(),
+        shop_name: p.category_id?.shop_id?.name || 'Không rõ'
+      }));
 
     res.status(200).json({
       status: 'OK',
-      data: relatedProducts
+      data: finalProducts
     });
 
   } catch (err) {
@@ -170,6 +185,7 @@ const getRelatedProducts = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
