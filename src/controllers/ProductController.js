@@ -12,8 +12,6 @@ const CategoryAttribution = require('../models/CategoryAttribution');
 const Attribution = require('../models/Attribution'); 
 const ProductVariant = require('../models/ProductVariantModel');
 
-const axios = require('axios');
-
 function isNumeric(value) {
   return Number.isFinite(Number(value)) && Number(value) >=0;
 }
@@ -223,42 +221,73 @@ const increaseViewCount = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: error.message });
   }
 };
+// const getTrendingProductsFromML = async (req, res) => {
+//   try {
+//     const allProducts = await Product.find().lean();
+
+//     const payload = allProducts.map(p => ({
+//       product_id: p._id,
+//       rating_avg: p.rating_avg || 0,
+//       sale_quantity: p.sale_quantity || 0,
+//       view_count: p.view_count || 0,
+//     }));
+
+//     const response = await axios.get('http://192.168.112.101:5000/predict-trending-from-db');
+
+
+//     const trendingIds = response.data.map(item => item.product_id);
+
+//     const trendingProducts = allProducts
+//       .filter(p => trendingIds.includes(p._id.toString()))
+//       .map(p => ({
+//         _id: p._id,
+//         name: p.name,
+//         images: p.images || [],
+//         price: p.price,
+//         discount: p.discount,
+//         rating_avg: p.rating_avg,
+//       }));
+
+//     res.status(200).json({ status: 'OK', data: trendingProducts });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       status: 'ERR',
+//       message: 'Không lấy được sản phẩm trending',
+//     });
+//   }
+// };
 const getTrendingProductsFromML = async (req, res) => {
-  try {
-    const allProducts = await Product.find().lean();
+ try {
+    const topTrending = await Product.find(
+      { trending_score: { $exists: true } },
+      {
+        _id: 1,
+        name: 1,
+        images: 1,
+        price: 1,
+        discount: 1,
+        rating_avg: 1,
+        trending_score: 1
+      }
+    )
+      .sort({ trending_score: -1 })
+      .limit(4)
+      .lean();
 
-    const payload = allProducts.map(p => ({
-      product_id: p._id,
-      rating_avg: p.rating_avg || 0,
-      sale_quantity: p.sale_quantity || 0,
-      view_count: p.view_count || 0,
-    }));
-
-    const response = await axios.get('http://192.168.112.101:5000/predict-trending-from-db');
-
-
-    const trendingIds = response.data.map(item => item.product_id);
-
-    const trendingProducts = allProducts
-      .filter(p => trendingIds.includes(p._id.toString()))
-      .map(p => ({
-        _id: p._id,
-        name: p.name,
-        images: p.images || [],
-        price: p.price,
-        discount: p.discount,
-        rating_avg: p.rating_avg,
-      }));
-
-    res.status(200).json({ status: 'OK', data: trendingProducts });
+    return res.status(200).json({
+      status: 'OK',
+      data: topTrending
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       status: 'ERR',
-      message: 'Không lấy được sản phẩm trending',
+      message: 'Không lấy được sản phẩm trending từ DB'
     });
   }
 };
+
 const removeAccents = require('remove-accents');
 
 const searchProducts = async (req, res) => {
@@ -373,7 +402,7 @@ const getProductVariantsByProductId = async (req, res) => {
 };
 
 
-const removeAccents = require('remove-accents');
+// const removeAccents = require('remove-accents');
 
 const getRecommendedProductByOrders = async (req, res) => {
   try {
