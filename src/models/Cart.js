@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
 
 const cartSchema = new mongoose.Schema({
-  id: {
-    type: mongoose.Schema.Types.ObjectId,
-    default: function () {
-      return new mongoose.Types.ObjectId(); // 👈 Cho phép tự động sinh id
-    },
-  },
   customer_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // 👈 nếu user chính là customer

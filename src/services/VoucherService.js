@@ -26,104 +26,34 @@ const getAllVoucher = async () => {
   }
 };
 
-// const updateNotiType = async (data) => {
-//   try {
-//     const updatedNotiType = await NotiType.findOneAndUpdate(
-//       { _id: data.id, deleted_at: null },
-//       {
-//         image: data.image,
-//         description: data.description,
-//         status: data.status,
-//       },
-//       { new: true } // trả về document mới sau khi cập nhật
-//     );
+const getDetailVoucher = async (id) => {
+  try {
+    const voucher = await Voucher.findById(id);
 
-//     if (updatedNotiType) {
-//       return {
-//         EM: "Cập nhật loại thông báo thành công",
-//         EC: 0,
-//         DT: updatedNotiType,
-//       };
-//     } else {
-//       return {
-//         EM: "Không tìm thấy loại thông báo cần cập nhật",
-//         EC: 0,
-//         DT: [],
-//       };
-//     }
-//   } catch (error) {
-//     console.log("Error in updateNotiType:", error);
-//     return {
-//       EM: "Đã xảy ra lỗi khi cập nhật loại thông báo",
-//       EC: -2,
-//       DT: [],
-//     };
-//   }
-// };
+    if (!voucher) {
+      return {
+        EM: "Không tìm thấy voucher",
+        EC: 1,
+        DT: null,
+      };
+    }
 
-// const deleteNotiType = async (id) => {
-//   try {
-//     const updatedNotiType = await NotiType.findByIdAndUpdate(
-//       id,
-//       { deleted_at: new Date() },
-//       { new: true }
-//     );
-
-//     if (updatedNotiType) {
-//       return {
-//         EM: "Đánh dấu loại thông báo là đã xóa thành công",
-//         EC: 0,
-//         DT: updatedNotiType,
-//       };
-//     } else {
-//       return {
-//         EM: "Không tồn tại loại thông báo cần đánh dấu xóa",
-//         EC: 0,
-//         DT: [],
-//       };
-//     }
-//   } catch (e) {
-//     console.log(e);
-//     return {
-//       EM: "Something wrongs in service...",
-//       EC: -2,
-//       DT: [],
-//     };
-//   }
-// };
-
-// const getDetailsNotiType = async (id) => {
-//   try {
-//     const notiType = await NotiType.findOne({
-//       _id: id,
-//       deleted_at: null,
-//     });
-//     if (notiType) {
-//       return {
-//         EM: "Lấy thông tin loại thông báo thành công",
-//         EC: 0,
-//         DT: notiType,
-//       };
-//     } else {
-//       return {
-//         EM: "Không tìm thấy loại thông báo",
-//         EC: 0,
-//         DT: notiType,
-//       };
-//     }
-//   } catch (e) {
-//     console.log(e);
-//     return {
-//       EM: "Something wrongs in service...",
-//       EC: -2,
-//       DT: [],
-//     };
-//   }
-// };
+    return {
+      EM: "Lấy chi tiết voucher thành công",
+      EC: 0,
+      DT: voucher,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      EM: "Có lỗi xảy ra trong service",
+      EC: -1,
+      DT: null,
+    };
+  }
+};
 
 module.exports = {
   getAllVoucher,
-  // updateNotiType,
-  // deleteNotiType,
-  // getDetailsNotiType,
+  getDetailVoucher,
 };

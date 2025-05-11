@@ -38,7 +38,28 @@ const getVouchersByShop = async (req, res) => {
     }
 }
 
+const getDetailVoucher = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await VoucherService.getDetailVoucher(id);
+  
+      return res.status(200).json({
+        EM: data.EM,
+        EC: data.EC,
+        DT: data.DT,
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        EM: "Lỗi từ server",
+        EC: -1,
+        DT: null,
+      });
+    }
+  };
+
 module.exports = {
     getAllVoucher,
-    getVouchersByShop
+    getVouchersByShop,
+    getDetailVoucher,
 };

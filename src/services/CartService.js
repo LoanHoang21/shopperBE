@@ -28,6 +28,7 @@ const deleteCart = async (id) => {
 
 const addToCart = async (userId, { product_id, quantity, variant_id }) => {
   let cart = await Cart.findOne({ customer_id: userId });
+  console.log('🛒 Tìm giỏ hàng:', cart);
   if (!cart) {
     cart = await Cart.create({ customer_id: userId });
   }
