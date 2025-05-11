@@ -6,18 +6,18 @@ const Category = require("../models/CategoryModel");
 const axios = require('axios');
 const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
-const ReviewProduct = require('../models/ReviewModel'); 
+const ReviewProduct = require('../models/ReviewModel');
 const ProductAttribution = require('../models/ProductAttribution');
 const CategoryAttribution = require('../models/CategoryAttribution');
-const Attribution = require('../models/Attribution'); 
+const Attribution = require('../models/Attribution');
 const ProductVariant = require('../models/ProductVariantModel');
 
 function isNumeric(value) {
-  return Number.isFinite(Number(value)) && Number(value) >=0;
+  return Number.isFinite(Number(value)) && Number(value) >= 0;
 }
 
 function isDiscount(value) {
-  return Number(value) <=99;  
+  return Number(value) <= 99;
 }
 
 const createProduct = async (req, res) => {
@@ -25,18 +25,16 @@ const createProduct = async (req, res) => {
     const {
       name, price, quantity, short_description, description,
       discount, sale_quantity, view_count, 
-      barcode_id, category_id // 👈 nhận trực tiếp category_id
+      barcode_id, category_id
     } = req.body;
 
-    const images = req.files?.map(file => file.path || file.secure_url) || [];
+    // ❌ Bỏ xử lý ảnh
+    // const images = req.files?.map(file => file.path || file.secure_url) || [];
 
-    // Kiểm tra thiếu trường
-    if (!name || !price || !quantity || images.length === 0 || !category_id)
-      {
+    if (!name || !price || !quantity || !category_id) {
       return res.status(400).json({ status: 'ERR', message: 'Missing required fields' });
     }
 
-    // Kiểm tra category có tồn tại không
     const category = await Category.findById(category_id);
     if (!category) {
       return res.status(400).json({ status: 'ERR', message: 'Invalid category_id' });
@@ -51,9 +49,7 @@ const createProduct = async (req, res) => {
       description,
       discount,
       view_count,
-      
       barcode_id,
-      images,
       category_id: category._id
     };
 
@@ -65,6 +61,7 @@ const createProduct = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: 'Server error' });
   }
 };
+
 
 
 const updateProduct = async (req, res) => {
@@ -111,7 +108,12 @@ const getDetailsProduct = async (req, res) => {
     await Product.findByIdAndUpdate(product_id, { $inc: { view_count: 1 } });
 
     const product = await Product.findById(product_id).lean();
-    
+    const variants = await ProductVariant.find({ product_id: product_id }).lean();
+    const images = variants.map(v => v.image).filter(Boolean); // Lấy ảnh từ variant
+
+    product.images = images;
+    product.variants = variants;
+
     if (!product) {
       return res.status(404).json({
         status: 'ERR',
@@ -207,25 +209,25 @@ const deleteProduct = async (req, res) => {
 };
 
 
-const getAllProduct = async (req,res)=>{
-  try{
-     const {limit,page,sort,filter} = req.query;
-     
-      const response = await ProductService.getAllProduct(Number(limit) || 1000,Number(page) || 0 ,sort,filter);
-      return res.status(200).json(response);
-  }catch(e){
-      return res.status(404).json({message:e})
+const getAllProduct = async (req, res) => {
+  try {
+    const { limit, page, sort, filter } = req.query;
+
+    const response = await ProductService.getAllProduct(Number(limit) || 1000, Number(page) || 0, sort, filter);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({ message: e })
   }
 }
 
-const getAllProductFilter = async (req,res)=>{
-  try{
-     const valueFilter = req.query;
-      const response = await ProductService.getAllProductFilter(valueFilter);
-      // const response = await ProductService.getAllProduct();
-      return res.status(200).json(response);
-  }catch(e){
-      return res.status(404).json({message:e})
+const getAllProductFilter = async (req, res) => {
+  try {
+    const valueFilter = req.query;
+    const response = await ProductService.getAllProductFilter(valueFilter);
+    // const response = await ProductService.getAllProduct();
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({ message: e })
   }
 }
 const increaseViewCount = async (req, res) => {
@@ -237,50 +239,13 @@ const increaseViewCount = async (req, res) => {
     return res.status(500).json({ status: 'ERR', message: error.message });
   }
 };
-// const getTrendingProductsFromML = async (req, res) => {
-//   try {
-//     const allProducts = await Product.find().lean();
-
-//     const payload = allProducts.map(p => ({
-//       product_id: p._id,
-//       rating_avg: p.rating_avg || 0,
-//       sale_quantity: p.sale_quantity || 0,
-//       view_count: p.view_count || 0,
-//     }));
-
-//     const response = await axios.get('http://192.168.112.101:5000/predict-trending-from-db');
-
-
-//     const trendingIds = response.data.map(item => item.product_id);
-
-//     const trendingProducts = allProducts
-//       .filter(p => trendingIds.includes(p._id.toString()))
-//       .map(p => ({
-//         _id: p._id,
-//         name: p.name,
-//         images: p.images || [],
-//         price: p.price,
-//         discount: p.discount,
-//         rating_avg: p.rating_avg,
-//       }));
-
-//     res.status(200).json({ status: 'OK', data: trendingProducts });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       status: 'ERR',
-//       message: 'Không lấy được sản phẩm trending',
-//     });
-//   }
-// };
 const getTrendingProductsFromML = async (req, res) => {
- try {
+  try {
     const topTrending = await Product.find(
       { trending_score: { $exists: true } },
       {
         _id: 1,
         name: 1,
-        images: 1,
         price: 1,
         discount: 1,
         rating_avg: 1,
@@ -290,7 +255,20 @@ const getTrendingProductsFromML = async (req, res) => {
       .sort({ trending_score: -1 })
       .limit(4)
       .lean();
+    const variants = await ProductVariant.find({
+      product_id: { $in: topTrending.map(p => p._id) }
+    }).lean();
 
+    const imageMap = {};
+    variants.forEach(v => {
+      const id = String(v.product_id);
+      if (!imageMap[id]) imageMap[id] = [];
+      if (v.image) imageMap[id].push(v.image);
+    });
+
+    topTrending.forEach(p => {
+      p.images = imageMap[String(p._id)] || [];
+    });
     return res.status(200).json({
       status: 'OK',
       data: topTrending
@@ -310,7 +288,6 @@ const searchProducts = async (req, res) => {
   try {
     const query = removeAccents(req.query.query || '').toLowerCase();
 
-    // populate để lấy shop name
     const allProducts = await Product.find()
       .populate({
         path: 'category_id',
@@ -322,9 +299,21 @@ const searchProducts = async (req, res) => {
       removeAccents(p.name || '').toLowerCase().includes(query)
     );
 
-    // Thêm shop_name vào kết quả trả về
+    const productIds = filtered.map(p => p._id);
+    const variants = await ProductVariant.find({
+      product_id: { $in: productIds }
+    }).lean();
+
+    const imageMap = {};
+    variants.forEach(v => {
+      const id = String(v.product_id);
+      if (!imageMap[id]) imageMap[id] = [];
+      if (v.image) imageMap[id].push(v.image);
+    });
+
     const result = filtered.map(p => ({
       ...p,
+      images: imageMap[String(p._id)] || [],
       shop_name: p.category_id?.shop_id?.name || 'Không rõ'
     }));
 
@@ -341,6 +330,7 @@ const searchProducts = async (req, res) => {
     });
   }
 };
+
 
 const getProductAttributions = async (req, res) => {
   try {
@@ -422,20 +412,20 @@ const getProductVariantsByProductId = async (req, res) => {
 
 const getRecommendedProductByOrders = async (req, res) => {
   try {
-      const userId = req.params.id;
-      let data = await ProductService.getRecommendedProductByOrders(userId);
-      return res.status(200).json({
-          EM: data.EM, // error message
-          EC: data.EC, // error code
-          DT: data.DT, // data
-      });
+    const userId = req.params.id;
+    let data = await ProductService.getRecommendedProductByOrders(userId);
+    return res.status(200).json({
+      EM: data.EM, // error message
+      EC: data.EC, // error code
+      DT: data.DT, // data
+    });
   } catch (error) {
-      console.log(e);
-      return res.status(500).json({ 
-          EM: 'error from server',
-          EC: '-1',
-          DT: '',
-      });
+    console.log(e);
+    return res.status(500).json({
+      EM: 'error from server',
+      EC: '-1',
+      DT: '',
+    });
   }
 };
 

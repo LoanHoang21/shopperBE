@@ -12,7 +12,6 @@ const productSchema = new mongoose.Schema({
   description: { type: String },
   view_count: { type: Number, default: 0 },
   rating_avg: { type: Number, default: 0 },
-  images: [{ type: String }],
   barcode_id: { type: Number },
   category_id: {
     type: mongoose.Schema.Types.ObjectId,
