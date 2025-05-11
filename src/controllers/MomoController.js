@@ -1,6 +1,6 @@
 const https = require('https');
 const crypto = require('crypto');
-const Order = require("../models/Order");
+const Order = require("../models/OrderModel");
 
 
 const createMomoPayment = async (req, res) => {

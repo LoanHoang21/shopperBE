@@ -1,6 +1,6 @@
 const axios = require("axios");
 const Product = require("../models/ProductModel");
-const Order = require("../models/Order");
+const Order = require("../models/OrderModel");
 const JwtService = require("./JwtService");
 const ProductVariant = require('../models/ProductVariantModel');
 const createProduct = (data) => {
