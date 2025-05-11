@@ -16,16 +16,39 @@ const createOrder = async (orderData) => {
 
       const availableStock = variant.quantity - variant.sale_quantity;
       if (availableStock < item.quantity) {
-        console.log(`Sản phẩm "${variant._id}" không đủ hàng. Còn lại: ${availableStock}, bạn đặt: ${item.quantity}`);
+        console.log(`Sản phẩm không đủ hàng. Còn lại: ${availableStock}, bạn đặt: ${item.quantity}`);
         return {
           status: "ERR",
-          message: `Sản phẩm "${variant._id}" không đủ hàng. Còn lại: ${availableStock}, bạn đặt: ${item.quantity}`,
+          message: `Sản phẩm không đủ hàng. Còn lại: ${availableStock}, bạn đặt: ${item.quantity}`,
         };
       }
     }
 
     // B2: Tạo đơn hàng
     const createdOrder = await Order.create(orderData);
+
+    if (orderData.payment_status === 'online') {
+      setTimeout(async () => {
+        const order = await Order.findById(createdOrder._id);
+    
+        if (order && order.status === 'unpaid' && order.payUrl) {
+          // ✅ Trừ lại sale_quantity từng sản phẩm
+          for (const item of order.products) {
+            await ProductVariant.findByIdAndUpdate(
+              item.product_id,
+              { $inc: { sale_quantity: -item.quantity } }
+            );
+          }
+    
+          // ✅ Cập nhật trạng thái đơn
+          order.payUrl = null;
+          order.status = 'cancelled';
+          await order.save();
+    
+          console.log(`💡 Đơn hàng ${order._id} bị huỷ do không thanh toán trong 1 giờ`);
+        }
+      }, 60 * 60 * 1000); 
+    }
 
     // ✅ B3: Tăng sale_quantity sau khi tạo đơn hàng thành công
     for (const item of orderData.products) {
@@ -46,7 +69,7 @@ const createOrder = async (orderData) => {
 
     return {
       status: "OK",
-      message: "Đặt hàng thành công 1233",
+      message: "Đặt hàng thành công",
       data: fullOrder,
     };
   } catch (error) {

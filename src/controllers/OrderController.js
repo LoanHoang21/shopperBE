@@ -11,10 +11,13 @@ const createOrder = async (req, res) => {
       shipment_id,
       payment_method_id,
       total_price,
+      shop_id,
+      payment_status,
+      status
     } = req.body;
 
     // Kiểm tra trường bắt buộc
-    if (!products || !quantity || !customer_id || !address_id || !payment_method_id || !total_price) {
+    if (!products || !quantity || !customer_id || !address_id || !payment_method_id || !total_price || !shop_id || !payment_status || !status) {
       return res.status(400).json({
         status: "ERR",
         message: "Missing required fields",
@@ -30,6 +33,9 @@ const createOrder = async (req, res) => {
       shipment_id,
       payment_method_id,
       total_price,
+      shop_id,
+      payment_status,
+      status
     };
     
     const result = await OrderService.createOrder(orderData);
