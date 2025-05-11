@@ -25,20 +25,13 @@ const deleteCart = async (id) => {
   return await Cart.findOneAndUpdate({ id }, { deleted_at: new Date() }, { new: true });
 };
 
-const isSameAttribution = (a, b) => {
-  if (a.length !== b.length) return false;
-  return a.every(attrA =>
-    b.some(attrB => attrA.category === attrB.category && attrA.value === attrB.value)
-  );
-};
 
-const addToCart = async (userId, { product_id, quantity, attributions = [], variant_id }) => {
+const addToCart = async (userId, { product_id, quantity, variant_id }) => {
   let cart = await Cart.findOne({ customer_id: userId });
   console.log('🛒 Tìm giỏ hàng:', cart);
   if (!cart) {
     cart = await Cart.create({ customer_id: userId });
   }
-  // console.log('📦 Cart tìm thấy:', cart?._id);
 
   const existingItems = await CartItem.find({
     cartId: cart._id,
@@ -46,35 +39,22 @@ const addToCart = async (userId, { product_id, quantity, attributions = [], vari
     deleted_at: null
   });
 
-  // console.log('📄 Các item đang có trong giỏ:', existingItems);
 
   const existingItem = existingItems.find(item =>
-    isSameAttribution(item.attributions || [], attributions)
+   item.variant_id == variant_id
   );
 
   if (existingItem) {
     existingItem.quantity += quantity;
     existingItem.updated_at = new Date();
     await existingItem.save();
-    console.log('✅ Trùng option -> cập nhật');
     return { status: 'OK', message: 'Updated cart item', data: existingItem };
   }
-
-  console.log('🆕 Không trùng -> tạo mới',{
-    product_id,
-    quantity,
-    attributions,
-    cartId: cart._id,
-    isSelected: false,
-    created_at: new Date(),
-    updated_at: new Date()
-  });
 
   const newItem = await CartItem.create({
     product_id: new mongoose.Types.ObjectId(product_id),
     quantity,
     variant_id: new mongoose.Types.ObjectId(variant_id),
-    attributions,
     cartId: new mongoose.Types.ObjectId(cart._id),
     isSelected: false,
     created_at: new Date(),
@@ -98,7 +78,15 @@ const getCartItemsByUser = async (userId) => {
         }
       }
     })
-    .populate('variant_id')
+    .populate({
+      path: 'variant_id',
+      populate: {
+        path: 'attribution_ids',
+        populate: {
+          path: 'category_attribution_id'
+        }
+      }
+    })
     .lean();
 
   return items;

@@ -28,7 +28,7 @@ const getVouchersByShop = async (req, res) => {
         const objectId = new mongoose.Types.ObjectId(shopId);  // ✅ ép đúng kiểu
 
         const vouchers = await Voucher.find({
-            type: 'Shop',
+            type_voucher: 'Shop',
             shopId: objectId
         });
 

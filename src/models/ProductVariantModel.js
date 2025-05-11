@@ -12,6 +12,13 @@ const ProductVariantSchema = new mongoose.Schema({
       value: { type: String, required: true },
     }
   ],
+  attribution_ids:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Attribution',
+      required: true,
+    }
+  ],
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
   discount: { type: Number, default: 0 },
