@@ -23,7 +23,7 @@ const createProduct = async (req, res) => {
   try {
     const {
       name, price, quantity, short_description, description,
-      discount, sale_quantity, view_count, 
+      discount, sale_quantity, view_count,
       barcode_id, category_id
     } = req.body;
 
@@ -133,6 +133,7 @@ const getDetailsProduct = async (req, res) => {
     });
   }
 };
+
 
 
 const getRelatedProducts = async (req, res) => {
@@ -248,11 +249,22 @@ const getTrendingProductsFromML = async (req, res) => {
         price: 1,
         discount: 1,
         rating_avg: 1,
-        trending_score: 1
+        trending_score: 1,
+        short_description: 1,
+        description: 1,
+        category_id: 1,
       }
     )
       .sort({ trending_score: -1 })
       .limit(4)
+      .populate({
+        path: 'category_id',
+        populate: {
+          path: 'shop_id',
+          model: 'Shop',
+          select: 'name',
+        },
+      })
       .lean();
     const variants = await ProductVariant.find({
       product_id: { $in: topTrending.map(p => p._id) }
@@ -264,9 +276,17 @@ const getTrendingProductsFromML = async (req, res) => {
       if (!imageMap[id]) imageMap[id] = [];
       if (v.image) imageMap[id].push(v.image);
     });
-
+    const variantMap = {};
+    variants.forEach(v => {
+      const id = String(v.product_id);
+      if (!variantMap[id]) variantMap[id] = [];
+      variantMap[id].push(v);
+    });
     topTrending.forEach(p => {
+      const id = String(p._id);
       p.images = imageMap[String(p._id)] || [];
+      p.variants = variantMap[id] || [];
+      p.shop_name = p.category_id?.shop_id?.name || 'Không rõ';
     });
     return res.status(200).json({
       status: 'OK',
@@ -280,7 +300,6 @@ const getTrendingProductsFromML = async (req, res) => {
     });
   }
 };
-
 const removeAccents = require('remove-accents');
 
 const searchProducts = async (req, res) => {
@@ -310,11 +329,20 @@ const searchProducts = async (req, res) => {
       if (v.image) imageMap[id].push(v.image);
     });
 
+    const variantMap = {};
+    variants.forEach(v => {
+      const id = String(v.product_id);
+      if (!variantMap[id]) variantMap[id] = [];
+      variantMap[id].push(v);
+    });
+
     const result = filtered.map(p => ({
       ...p,
       images: imageMap[String(p._id)] || [],
+      variants: variantMap[String(p._id)] || [],
       shop_name: p.category_id?.shop_id?.name || 'Không rõ'
     }));
+
 
     res.status(200).json({
       status: 'OK',
@@ -411,13 +439,13 @@ const getProductVariantsByProductId = async (req, res) => {
 
 const getRecommendedProductByOrders = async (req, res) => {
   try {
-      const customerId = req.query.customer_id;
-      let data = await ProductService.getRecommendedProductByOrders(customerId);
-      return res.status(200).json({
-          EM: data.EM, // error message
-          EC: data.EC, // error code
-          DT: data.DT, // data
-      });
+    const customerId = req.query.customer_id;
+    let data = await ProductService.getRecommendedProductByOrders(customerId);
+    return res.status(200).json({
+      EM: data.EM, // error message
+      EC: data.EC, // error code
+      DT: data.DT, // data
+    });
 
   } catch (error) {
     console.log(e);

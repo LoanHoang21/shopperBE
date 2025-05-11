@@ -35,38 +35,46 @@ const getAllProduct = (limit, page, sort, filter) => {
     try {
       const totalProduct = await Product.countDocuments();
 
-      // Truy vấn sản phẩm chính
+      // Lấy danh sách sản phẩm và populate shop name
       let allProduct = await Product.find()
         .limit(limit)
         .skip(page * limit)
         .populate({
-          path: "category_id",
+          path: 'category_id',
           populate: {
-            path: "shop_id",
-            model: "Shop",
-            select: "name",
+            path: 'shop_id',
+            model: 'Shop',
+            select: 'name',
           },
         })
         .lean();
 
-      // Lấy tất cả variant theo product_id
-      const productIds = allProduct.map((p) => p._id);
+      const productIds = allProduct.map(p => p._id);
+
+      // Lấy toàn bộ variants theo product_id
       const variants = await ProductVariant.find({
-        product_id: { $in: productIds },
+        product_id: { $in: productIds }
       }).lean();
 
-      // Map ảnh từ variant vào product
+      // Map ảnh và variants
       const imageMap = {};
-      variants.forEach((v) => {
+      const variantMap = {};
+
+      variants.forEach(v => {
         const id = String(v.product_id);
         if (!imageMap[id]) imageMap[id] = [];
+        if (!variantMap[id]) variantMap[id] = [];
+
         if (v.image) imageMap[id].push(v.image);
+        variantMap[id].push(v);
       });
 
-      const finalProduct = allProduct.map((p) => ({
+      // Gộp vào sản phẩm
+      const finalProduct = allProduct.map(p => ({
         ...p,
         images: imageMap[String(p._id)] || [],
-        shop_name: p.category_id?.shop_id?.name || "Không rõ",
+        variants: variantMap[String(p._id)] || [],
+        shop_name: p.category_id?.shop_id?.name || 'Không rõ',
       }));
 
       return resolve({
@@ -77,11 +85,13 @@ const getAllProduct = (limit, page, sort, filter) => {
         pageCurrent: page + 1,
         totalPage: Math.ceil(totalProduct / limit),
       });
+
     } catch (e) {
       reject(e);
     }
   });
 };
+
 
 const getRecommendedProductByOrders = async (customerId) => {
   try {
