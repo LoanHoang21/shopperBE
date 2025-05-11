@@ -3,7 +3,7 @@
 const OrderAdminService = require("../services/OrderAdminService");
 
 const getAllOrderById = async (req, res) => {
-    const customerId = req.params.id;
+    const customerId = req.query.customer_id;
     try{
         let data = await OrderAdminService.getAllOrderById(customerId);
         return res.status(200).json({

@@ -54,6 +54,10 @@ const orderSchema = new mongoose.Schema({
   payment_method_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PaymentMethod',
+  },
+  shop_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Shop',
   }
 }, {
   timestamps: true,

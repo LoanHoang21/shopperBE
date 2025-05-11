@@ -12,6 +12,8 @@ const CartRouter = require('./CartRouter');
 const CartItemRouter = require('./CartItemRouter');
 const PaymentMethodRouter = require('./PaymentMethodRouter');
 const SettingNotiRouter = require('./SettingNotiRouter');
+const ShopRouter = require('./ShopRouter');
+const OrderShopRouter = require('./OrderShopRouter');
 
 const routes = (app)=>{
     app.use("/api/product", ProductRouter)
@@ -26,9 +28,11 @@ const routes = (app)=>{
     app.use("/api/address", AddressRouter)
     app.use("/api/shipment", ShipmentRouter)
     app.use("/api/payment-method", PaymentMethodRouter)
-    app.use("/api/cart", CartRouter); // 
+    app.use("/api/cart", CartRouter);
 
-    app.use("/api/settingNoti", SettingNotiRouter)
+    app.use("/api/settingNoti", SettingNotiRouter);
+    app.use("/api/shop", ShopRouter);
+    app.use("/api/orderShop", OrderShopRouter);
 }
 
 module.exports = routes

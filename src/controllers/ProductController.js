@@ -3,7 +3,6 @@ const { StatusCodes } = require('http-status-codes');
 const ProductService = require("../services/ProductService");
 const JwtService = require("../services/JwtService");
 const Category = require("../models/CategoryModel");
-const axios = require('axios');
 const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
 const ReviewProduct = require('../models/ReviewModel'); 
@@ -406,8 +405,8 @@ const getProductVariantsByProductId = async (req, res) => {
 
 const getRecommendedProductByOrders = async (req, res) => {
   try {
-      const userId = req.params.id;
-      let data = await ProductService.getRecommendedProductByOrders(userId);
+      const customerId = req.query.customer_id;
+      let data = await ProductService.getRecommendedProductByOrders(customerId);
       return res.status(200).json({
           EM: data.EM, // error message
           EC: data.EC, // error code

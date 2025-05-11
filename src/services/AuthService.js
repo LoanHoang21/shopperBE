@@ -132,7 +132,6 @@ const checkPassword = (inputPassword, hashPassword) => {
 }
 
 const login = async (rawData) => {
-  console.log("đăng nhập thành công")
   try {
     let user = await User.findOne({
       $or: [
@@ -142,12 +141,10 @@ const login = async (rawData) => {
       ]
     });
 
-    // console.log(">>>>>>>check user", user);
-
     if(user){
       let isCorrectPassword = checkPassword(rawData.password, user.password);
       if(isCorrectPassword === true){
-        if(user.role !== 1){
+        if(user.role === 0){
           startUserVoucherJob(user._id);
         }
         return {
@@ -157,13 +154,11 @@ const login = async (rawData) => {
         };
       }
     }
-    // console.log("Tên đăng nhập/Email/SĐT hoặc mật khẩu không đúng", rawData.valueLogin,"password: ", rawData.password);
     return {
       EM: "Tên đăng nhập/Email/SĐT hoặc mật khẩu không đúng",
       EC: 1,
       DT: '',
     };
-    // console.log(rawData);
   } catch (error) {
     console.log(error);
     return {

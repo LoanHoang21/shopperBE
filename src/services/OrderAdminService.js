@@ -147,9 +147,25 @@ const updateStatusOrder = async (orderId, data) => {
 const getAllOrder = async () => {
   try {
     let orders = await Order.find()
-                .populate('products.product_id') // Nếu bạn muốn lấy thông tin đầy đủ của sản phẩm
-                .populate('voucher_id', 'discount_type discount_value min_order_value max_discount_value')
-                .sort({ updatedAt: -1 }); // Sắp xếp đơn hàng mới nhất trước
+                .populate({
+                  path: 'products.product_id', // populate ProductVariant
+                  select: '_id product_id attribution_ids image',
+                  populate: {
+                    path: 'product_id', // trong ProductVariant, populate tiếp Product
+                    model: 'Product',
+                    select: 'name',
+                    // populate: {
+                    //   path: 'attribution_ids', // cấp 3: Attribute
+                    //   model: 'Attribution',
+                    //   select: 'name category_attribution_id'
+                    //   populate: {
+                    //     path: 'category_attribution_id',
+                    //     model: 'CategoryAttribution',
+                    //   }
+                    // }
+                  }
+                })
+                .sort({ updatedAt: -1 });
     if (orders) {
       return {
         EM: "Lấy danh sách tất cả đơn hàng thành công",

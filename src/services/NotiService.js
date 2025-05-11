@@ -343,10 +343,44 @@ const getDetailsNoti = async (id) => {
   }
 };
 
+const getAllNotiByAdminAndNotiType = async (senderId, notiTypeId) => {
+  try {
+    let query = {
+      notitype_id: notiTypeId,
+      deleted_at: null,
+      $or: [
+        { sender_id: senderId },
+        { sender_id: null }
+      ]
+    };
+    let notis = await Noti.find(query).sort({ updatedAt: -1 });
+    if (notis) {
+      return {
+        EM: "Lấy danh sách thông báo theo loại thông báo thành công",
+        EC: 0,
+        DT: notis,
+      };
+    } else {
+      return {
+        EM: "Danh sách thông báo theo loại thông báo trống",
+        EC: 0,
+        DT: notis,
+      };
+    }
+  } catch (e) {
+    console.log(e);
+    return {
+      EM: "Something wrongs in service...",
+      EC: -2,
+      DT: [],
+    };
+  }
+};
+
 const getAllNotiBySenderIdAndNotiType = async (senderId, notiTypeId) => {
   try {
     let notis = await Noti.find({
-      // sender_id: senderId || null,
+      sender_id: senderId,
       notitype_id: notiTypeId,
       deleted_at: null
     }).sort({ updatedAt: -1 });
@@ -681,6 +715,7 @@ module.exports = {
   updateStatusNoti,
   getDetailsNoti,
   createNotiVoucher,
+  getAllNotiByAdminAndNotiType,
   getAllNotiBySenderIdAndNotiType,
   getNotiUpdateOrder,
   getTwoNotiUpdateOrderLastest,

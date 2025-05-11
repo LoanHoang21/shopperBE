@@ -38,7 +38,7 @@ const createNotiVoucher = async (req, res) => {
 }
 
 const getAllNotiByReceiveId = async (req, res) => {
-    const receiverId = req.params.id;
+    const receiverId = req.query.receiver_id;
     try{
         let data = await NotiService.getAllNotiByReceiveId(receiverId);
         return res.status(200).json({
@@ -57,8 +57,9 @@ const getAllNotiByReceiveId = async (req, res) => {
 }
 
 const getAllNotiByNotiType = async (req, res) => {
-    const receiverId = req.params.id;
+    const receiverId = req.query.receiver_id;
     const notiTypeId = req.query.notitype_id;
+    console.log(receiverId, notiTypeId);
     try{
         let data = await NotiService.getAllNotiByNotiType(receiverId, notiTypeId);
         return res.status(200).json({
@@ -96,8 +97,30 @@ const updateStatusNoti = async (req, res) => {
 
 }
 
+const getAllNotiByAdminAndNotiType = async (req, res) => {
+    // const senderId = req.params.id;
+    const senderId =  req.query.sender_id;
+    const notiTypeId = req.query.notitype_id;
+    try{
+        let data = await NotiService.getAllNotiByAdminAndNotiType(senderId, notiTypeId);
+        return res.status(200).json({
+            EM: data.EM, // error message
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ 
+            EM: 'error from server',
+            EC: '-1',
+            DT: '',
+        });
+    }
+}
+
 const getAllNotiBySenderIdAndNotiType = async (req, res) => {
-    const senderId = req.params.id;
+    // const senderId = req.params.id;
+    const senderId =  req.query.sender_id;
     const notiTypeId = req.query.notitype_id;
     try{
         let data = await NotiService.getAllNotiBySenderIdAndNotiType(senderId, notiTypeId);
@@ -117,7 +140,7 @@ const getAllNotiBySenderIdAndNotiType = async (req, res) => {
 }
 
 const getNotiUpdateOrder = async (req, res) => {
-    const receiverId = req.params.id;
+    const receiverId = req.query.receiver_id;
     const notiTypeId = req.query.notitype_id;
     try{
         let data = await NotiService.getNotiUpdateOrder(receiverId, notiTypeId);
@@ -137,7 +160,7 @@ const getNotiUpdateOrder = async (req, res) => {
 }
 
 const getTwoNotiUpdateOrderLastest = async (req, res) => {
-    const receiverId = req.params.id;
+    const receiverId = req.query.receiver_id;
     const notiTypeId = req.query.notitype_id;
     try{
         let data = await NotiService.getTwoNotiUpdateOrderLastest(receiverId, notiTypeId);
@@ -218,6 +241,7 @@ module.exports = {
     createNotiOrder,
     createNotiVoucher,
     getAllNotiByReceiveId,
+    getAllNotiByAdminAndNotiType,
     getAllNotiBySenderIdAndNotiType,
     getNotiUpdateOrder,
     getTwoNotiUpdateOrderLastest,

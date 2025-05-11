@@ -40,6 +40,5 @@ const getVouchersByShop = async (req, res) => {
 
 module.exports = {
     getAllVoucher,
-    // createNotiOrder,
     getVouchersByShop
 };
