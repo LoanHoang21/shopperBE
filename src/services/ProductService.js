@@ -2,7 +2,7 @@ const axios = require("axios");
 const Product = require("../models/ProductModel");
 const Order = require("../models/OrderModel");
 const JwtService = require("./JwtService");
-const ProductVariant = require('../models/ProductVariantModel');
+const ProductVariant = require("../models/ProductVariantModel");
 const createProduct = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -40,31 +40,33 @@ const getAllProduct = (limit, page, sort, filter) => {
         .limit(limit)
         .skip(page * limit)
         .populate({
-          path: 'category_id',
+          path: "category_id",
           populate: {
-            path: 'shop_id',
-            model: 'Shop',
-            select: 'name',
+            path: "shop_id",
+            model: "Shop",
+            select: "name",
           },
         })
         .lean();
 
       // Lấy tất cả variant theo product_id
-      const productIds = allProduct.map(p => p._id);
-      const variants = await ProductVariant.find({ product_id: { $in: productIds } }).lean();
+      const productIds = allProduct.map((p) => p._id);
+      const variants = await ProductVariant.find({
+        product_id: { $in: productIds },
+      }).lean();
 
       // Map ảnh từ variant vào product
       const imageMap = {};
-      variants.forEach(v => {
+      variants.forEach((v) => {
         const id = String(v.product_id);
         if (!imageMap[id]) imageMap[id] = [];
         if (v.image) imageMap[id].push(v.image);
       });
 
-      const finalProduct = allProduct.map(p => ({
+      const finalProduct = allProduct.map((p) => ({
         ...p,
         images: imageMap[String(p._id)] || [],
-        shop_name: p.category_id?.shop_id?.name || 'Không rõ',
+        shop_name: p.category_id?.shop_id?.name || "Không rõ",
       }));
 
       return resolve({
@@ -83,34 +85,34 @@ const getAllProduct = (limit, page, sort, filter) => {
 
 const getRecommendedProductByOrders = async (customerId) => {
   try {
-    const res = await axios.get('http://localhost:3001/api/orderAdmin/getAll', {
+    const res = await axios.get("http://localhost:3001/api/orderAdmin/getAll", {
       params: {
         customer_id: customerId,
       },
     });
     const orderByUser = res.data.DT;
 
-    if(!orderByUser || orderByUser.length === 0){
+    if (!orderByUser || orderByUser.length === 0) {
       const res1 = await fetch(`http://localhost:3001/api/product/getAll`);
       const json1 = await res1.json();
       const products = json1?.data;
       return {
-        EM: 'Trả về tất cả sản phẩm',
+        EM: "Trả về tất cả sản phẩm",
         EC: 0,
         DT: products,
       };
-    }else{
-      const allProductIds = orderByUser.flatMap(order =>
-        order.products.map(p => p.product_id)
+    } else {
+      const allProductIds = orderByUser.flatMap((order) =>
+        order.products.map((p) => p.product_id)
       );
 
-      const allIds = allProductIds.map(product => product.product_id);
+      const allIds = allProductIds.map((product) => product.product_id);
 
       // Truy vấn sản phẩm theo _id
       const products = await Product.find({ _id: { $in: allIds } }).lean();
 
       const categoryCount = {};
-      products.forEach(product => {
+      products.forEach((product) => {
         const cateId = product.category_id?.toString();
         if (cateId) {
           categoryCount[cateId] = (categoryCount[cateId] || 0) + 1;
@@ -123,28 +125,60 @@ const getRecommendedProductByOrders = async (customerId) => {
         .slice(0, 2)
         .map(([categoryId]) => categoryId);
 
-        // Lấy tất cả sản phẩm thuộc 2 category phổ biến nhất
+      // Lấy tất cả sản phẩm thuộc 2 category phổ biến nhất
       const categoryProducts = await Product.find({
         category_id: { $in: topCategoryIds },
-        deleted_at: null
+        deleted_at: null,
       });
 
-      // Tính giá sau giảm cho từng sản phẩm
-      for (const p of categoryProducts) {
-        const discountRate = (p.discount || 0) / 100;
-        p.discountedPrice = p.price * (1 - discountRate);
+      /// Gọi API chi tiết cho tất cả sản phẩm
+      const productDetailResponses = await Promise.all(
+        categoryProducts.map(async (p) => {
+          try {
+            const res = await axios.get(
+              `http://localhost:3001/api/product/get-details/${p._id}`
+            );
+            return res.data.data; // dữ liệu chi tiết sản phẩm
+          } catch (error) {
+            console.error(`Lỗi khi gọi API sản phẩm ${p._id}:`, error.message);
+            return null;
+          }
+        })
+      );
+      // Lọc ra các sản phẩm có dữ liệu hợp lệ và tính giá giảm nhỏ nhất trong variants
+      const productsWithMinDiscountedPrice = [];
+
+      for (const product of productDetailResponses) {
+        if (!product || !Array.isArray(product.variants)) continue;
+
+        let minDiscountedPrice = Infinity;
+        for (const variant of product.variants) {
+          const discountRate = (variant.discount || 0) / 100;
+          const discountedPrice = variant.price * (1 - discountRate);
+          if (discountedPrice < minDiscountedPrice) {
+            minDiscountedPrice = discountedPrice;
+          }
+        }
+
+        if (minDiscountedPrice !== Infinity) {
+          productsWithMinDiscountedPrice.push({
+            ...product,
+            discountedPrice: minDiscountedPrice,
+          });
+        }
       }
-      // Lấy <= 10 sản phẩm có giá sau giảm rẻ nhất
-      const bestDeals = categoryProducts
-      .sort((a, b) => a.discountedPrice - b.discountedPrice)
-      .slice(0, 10);
+
+      // Lấy 10 sản phẩm có giá sau giảm thấp nhất
+      const bestDeals = productsWithMinDiscountedPrice
+        .sort((a, b) => a.discountedPrice - b.discountedPrice)
+        .slice(0, 10);
 
       return {
-        EM: 'Gợi ý sản phẩm từ đơn hàng gần đây',
+        EM: "Gợi ý sản phẩm từ đơn hàng gần đây",
         EC: 0,
-        DT: bestDeals
+        DT: bestDeals,
       };
-      }
+    }
   } catch (error) {
     return {
       EM: "Đã xảy ra lỗi khi lấy chi tiết người dùng",
