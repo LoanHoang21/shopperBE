@@ -418,6 +418,7 @@ const getRecommendedProductByOrders = async (req, res) => {
           EC: data.EC, // error code
           DT: data.DT, // data
       });
+
   } catch (error) {
     console.log(e);
     return res.status(500).json({
