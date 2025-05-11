@@ -1,6 +1,6 @@
 // const User = require("../models/UserModel");
 // const NotiType = require("../models/NotiTypeModel");
-const Order = require("../models/OrderModel");
+const Order = require("../models/Order");
 
 const getAllOrderById = async (customerId) => {
   // console.log(customerId);

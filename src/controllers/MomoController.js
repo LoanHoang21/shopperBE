@@ -17,7 +17,7 @@ const createMomoPayment = async (req, res) => {
   const requestId = partnerCode + new Date().getTime();
   const orderInfo = 'pay with MoMo';
   const redirectUrl = 'https://momo.vn/return';
-  const ipnUrl = 'https://7139-2405-4802-1f02-220-a168-9268-f85a-49e8.ngrok-free.app/api/order/ipn';
+  const ipnUrl = 'https://3169-2405-4802-1f02-220-4a3-1b11-f315-742b.ngrok-free.app/api/order/ipn';
   const amount = totalPrice;
   const requestType = 'captureWallet';
   const extraData = '';
