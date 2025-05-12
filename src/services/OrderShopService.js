@@ -70,7 +70,6 @@ const getAllOrder = async (shopId) => {
     let orders = await Order.find({shop_id: shopId, deletedAt: null})
                 .populate({
                   path: 'products.product_id', // populate ProductVariant
-                  select: '_id product_id attribution_ids image',
                   populate: {
                     path: 'product_id', // trong ProductVariant, populate tiếp Product
                     model: 'Product',

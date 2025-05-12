@@ -140,7 +140,7 @@ const getProductVariantsWithDetails = async (productRequests) => {
 
 const updateOrderStatus = async (orderId, status) => {
   try {
-    const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses = ['pending', 'confirmed', 'shipping', 'delivered', 'completed','cancelled', 'unpaid'];
     if (!validStatuses.includes(status)) {
       return { status: 'ERR', message: 'Invalid order status' };
     }

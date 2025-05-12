@@ -110,7 +110,7 @@ const getDetailsProduct = async (req, res) => {
     const variants = await ProductVariant.find({ product_id: product_id }).lean();
     const images = variants.map(v => v.image).filter(Boolean); // Lấy ảnh từ variant
 
-    product.images = images;
+    product.images = images ;
     product.variants = variants;
 
     if (!product) {
@@ -133,8 +133,6 @@ const getDetailsProduct = async (req, res) => {
     });
   }
 };
-
-
 
 const getRelatedProducts = async (req, res) => {
   try {
@@ -176,10 +174,31 @@ const getRelatedProducts = async (req, res) => {
         ...p.toObject(),
         shop_name: p.category_id?.shop_id?.name || 'Không rõ'
       }));
+    const variants = await ProductVariant.find({
+      product_id: { $in: finalProducts.map(p => p._id) }
+    }).lean();
+
+    const imageMap = {};
+    variants.forEach(v => {
+      const id = String(v.product_id);
+      if (!imageMap[id]) imageMap[id] = [];
+      if (v.image) imageMap[id].push(v.image);
+    });
+    const variantMap = {};
+    variants.forEach(v => {
+      const id = String(v.product_id);
+      if (!variantMap[id]) variantMap[id] = [];
+      variantMap[id].push(v);
+    });
+    const finalWithImagesAndVariants = finalProducts.map(p => ({
+      ...p,
+      images: imageMap[String(p._id)] || [],
+      variants: variantMap[String(p._id)] || [],
+    }));
 
     res.status(200).json({
       status: 'OK',
-      data: finalProducts
+      data: finalWithImagesAndVariants
     });
 
   } catch (err) {
@@ -187,7 +206,6 @@ const getRelatedProducts = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
